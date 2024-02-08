@@ -23,9 +23,9 @@ setup(
         "Operating System :: OS Independent",
     ],
     packages=find_packages(),  
-    include_package_data=True,  # Inclut les fichiers spécifiés dans MANIFEST.in
+    include_package_data=True,  
     install_requires=[  
-        "matplotlib>=3.8.2",
+        "matplotlib",
         "numpy>=1.26.4",
         "optbinning>=0.19.0",
         "pandas>=1.5.3",
