@@ -346,7 +346,6 @@ class multioptbinning:
 
         # Transforming each variable
         for variable in [v for v in self.variables if v not in binary_columns]:
-            print(binary_columns)
             if variable in self.optb_models:
                 # Check the number of bins created for the variable
                 n_bins = len(self.optb_models[variable].splits) + 1
