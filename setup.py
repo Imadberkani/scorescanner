@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-
+print(find_packages())
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here,'REDAME.md'), encoding='utf-8') as f:
     long_description = f.read()
@@ -34,7 +34,8 @@ setup(
         "scikit-learn>=1.4.0",
         "scipy>=1.12.0",
         "statsmodels>=0.14.1",
-        "tqdm>=4.66.1"
+        "tqdm>=4.66.1",
+        "jinja2==3.0.1"
         
     ],
      test_suite="tests",

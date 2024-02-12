@@ -65,7 +65,9 @@ dist/
 env/
 # Ignorer l'environnement
 lib_env/
+test_env/
 scorescanner.egg-info/
+__pycache__/
 # CMake
 cmake-build-*/
 

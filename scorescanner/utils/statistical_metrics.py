@@ -16,8 +16,7 @@ cluster_corr_matrix : Reorganizes a correlation matrix based on hierarchical clu
 
 """
 
-
-#Importing Libraries
+# Importing Libraries
 import warnings
 import pandas as pd
 import numpy as np
@@ -30,10 +29,9 @@ from sklearn.preprocessing import StandardScaler
 import statsmodels.api as sm
 
 
-
 def cramers_v(df: pd.DataFrame, cat_var: str, target_var: str) -> float:
     """
-    Calculate the Cramér's V coefficient to measure the association between 
+    Calculate the Cramér's V coefficient to measure the association between
     two categorical variables of a DataFrame.
 
     Parameters:
@@ -42,7 +40,7 @@ def cramers_v(df: pd.DataFrame, cat_var: str, target_var: str) -> float:
     target_var (str): The name of the second categorical variable in the DataFrame.
 
     Returns:
-    float: The Cramér's V coefficient, a number between 0 and 1, where 0 indicates 
+    float: The Cramér's V coefficient, a number between 0 and 1, where 0 indicates
     no association and 1 indicates a perfect association.
 
     """
@@ -50,7 +48,7 @@ def cramers_v(df: pd.DataFrame, cat_var: str, target_var: str) -> float:
     # Checking if the variable are column of the dataframe
     if cat_var not in df.columns or target_var not in df.columns:
         raise ValueError("Specified variables must be in the DataFrame")
-      
+
     # Creating a contingency table
     contingency_table = pd.crosstab(df[cat_var], df[target_var])
 
@@ -73,7 +71,9 @@ def cramers_v(df: pd.DataFrame, cat_var: str, target_var: str) -> float:
     return cramers_v
 
 
-def univariate_feature_importance(df: pd.DataFrame, features: list, target_var: str, method: str) -> pd.DataFrame:
+def univariate_feature_importance(
+    df: pd.DataFrame, features: list, target_var: str, method: str
+) -> pd.DataFrame:
     """
     Calculate and rank features based on their importance using either Cramér's V or Predictive Power Score (PPS)
     in relation to a target variable, depending on the chosen method.
@@ -89,7 +89,7 @@ def univariate_feature_importance(df: pd.DataFrame, features: list, target_var: 
     sorted in descending order of importance.
     """
     # Supported methods
-    if method not in ['cramerv', 'ppscore']:
+    if method not in ["cramerv", "ppscore"]:
         raise ValueError("Method must be 'cramerv' or 'ppscore'")
 
     importance_scores = []
@@ -98,23 +98,27 @@ def univariate_feature_importance(df: pd.DataFrame, features: list, target_var: 
         if feature not in df.columns or target_var not in df.columns:
             raise ValueError("Specified variables must be in the DataFrame")
 
-        if method == 'cramerv':
+        if method == "cramerv":
             score = cramers_v(df, feature, target_var)
-        elif method == 'ppscore':
-            score = pps.score(df, feature, target_var)['ppscore']
+        elif method == "ppscore":
+            score = pps.score(df, feature, target_var)["ppscore"]
 
         importance_scores.append((feature, score))
 
-    
-    importance_df = pd.DataFrame(importance_scores, columns=["Feature", "Univariate_Importance"])
+    importance_df = pd.DataFrame(
+        importance_scores, columns=["Feature", "Univariate_Importance"]
+    )
     # Sorting the DataFrame by importance
-    importance_df = importance_df.sort_values(by="Univariate_Importance", ascending=False)
+    importance_df = importance_df.sort_values(
+        by="Univariate_Importance", ascending=False
+    )
 
-    return importance_df
+    return importance_df.style.bar(subset=["Univariate_Importance"], color="#5f8fd6")
 
 
-
-def calculate_js_distances(df: pd.DataFrame, feature: str, target_var: str) -> pd.DataFrame:
+def calculate_js_distances(
+    df: pd.DataFrame, feature: str, target_var: str
+) -> pd.DataFrame:
     """
     Calculate the Jensen-Shannon distance for each category of an categorical feature by
     measuring its divergence from the target variable.
@@ -125,7 +129,7 @@ def calculate_js_distances(df: pd.DataFrame, feature: str, target_var: str) -> p
     target_var (str): The name of the target variable.
 
     Returns:
-    pd.DataFrame: A DataFrame containing the categories of the feature 
+    pd.DataFrame: A DataFrame containing the categories of the feature
     and their corresponding Jensen-Shannon distances to the target variable distribution.
     """
 
@@ -133,13 +137,21 @@ def calculate_js_distances(df: pd.DataFrame, feature: str, target_var: str) -> p
         raise ValueError("Specified variables must be in the DataFrame")
 
     # Calculating the probability distributions for each category of the feature
-    prob_distributions = pd.crosstab(df[feature], df[target_var]).apply(lambda x: x/x.sum(), axis=1)
+    prob_distributions = pd.crosstab(df[feature], df[target_var]).apply(
+        lambda x: x / x.sum(), axis=1
+    )
 
     # Calculating the global distribution of the target variable
-    global_distribution = df[target_var].value_counts(normalize=True).reindex(prob_distributions.columns, fill_value=0)
+    global_distribution = (
+        df[target_var]
+        .value_counts(normalize=True)
+        .reindex(prob_distributions.columns, fill_value=0)
+    )
 
     # Calculating the Jensen-Shannon distance for each category
-    js_distances = prob_distributions.apply(lambda row: jensenshannon(row, global_distribution), axis=1)
+    js_distances = prob_distributions.apply(
+        lambda row: jensenshannon(row, global_distribution), axis=1
+    )
 
     # Creating a DataFrame to display the results
     js_distances_df = pd.DataFrame(js_distances, columns=["Jensen-Shannon Distance"])
@@ -149,10 +161,12 @@ def calculate_js_distances(df: pd.DataFrame, feature: str, target_var: str) -> p
     return js_distances_df
 
 
-def univariate_category_importance(df: pd.DataFrame, categorical_vars: list, target_var: str) -> pd.DataFrame:
+def univariate_category_importance(
+    df: pd.DataFrame, categorical_vars: list, target_var: str
+) -> pd.DataFrame:
     """
-    Calculate the Jensen-Shannon distance for each category of each categorical variable 
-    in a DataFrame in relation to a target variable and return a combined DataFrame 
+    Calculate the Jensen-Shannon distance for each category of each categorical variable
+    in a DataFrame in relation to a target variable and return a combined DataFrame
     with all categories and their distances.
 
     Parameters:
@@ -161,7 +175,7 @@ def univariate_category_importance(df: pd.DataFrame, categorical_vars: list, tar
     target_var (str): The name of the target variable.
 
     Returns:
-    pd.DataFrame: A DataFrame containing the variable name, category, and their 
+    pd.DataFrame: A DataFrame containing the variable name, category, and their
     Jensen-Shannon distances to the target variable distribution.
 
     Raises:
@@ -175,17 +189,21 @@ def univariate_category_importance(df: pd.DataFrame, categorical_vars: list, tar
             raise ValueError("Specified variables must be in the DataFrame")
 
         js_distances_df = calculate_js_distances(df, cat_var, target_var)
-        js_distances_df['Variable'] = cat_var
+        js_distances_df["Variable"] = cat_var
         all_distances.append(js_distances_df)
 
     # Concatenating all distance DataFrames
     category_importance_df = pd.concat(all_distances)
     category_importance_df.rename(columns={cat_var: "Category"}, inplace=True)
 
-    return category_importance_df.sort_values(by="Jensen-Shannon Distance", ascending=False)
+    return category_importance_df.sort_values(
+        by="Jensen-Shannon Distance", ascending=False
+    )
 
 
-def one_vs_rest_woe(df: pd.DataFrame, feature: str, target_var: str, cat_ref=None) -> pd.DataFrame:
+def one_vs_rest_woe(
+    df: pd.DataFrame, feature: str, target_var: str, cat_ref=None
+) -> pd.DataFrame:
     """
     Calculate the Weight of Evidence (WoE), considering a specific category
     as reference and grouping the rest.
@@ -195,7 +213,7 @@ def one_vs_rest_woe(df: pd.DataFrame, feature: str, target_var: str, cat_ref=Non
     feature (str): The name of the categorical explanatory variable.
     target_var (str): The name of the target variable.
     cat_ref: The reference category in the categorical variable.
-    
+
 
     Returns:
     pd.DataFrame: A DataFrame containing the WoE for each category of the explanatory variable.
@@ -207,27 +225,31 @@ def one_vs_rest_woe(df: pd.DataFrame, feature: str, target_var: str, cat_ref=Non
 
     # Selecting a random category as reference if cat_ref is None
     if cat_ref is None:
-        cat_ref = np.random.choice(df[target_var].unique())    
-    
-    print("The reference category:",cat_ref)
+        cat_ref = np.random.choice(df[target_var].unique())
+
+    print("The reference category:", cat_ref)
     # Creating a copy of the DataFrame
     df_copy = df[[feature, target_var]].copy()
 
     # Identifying the 'rest' categories and grouping them
     rest_cat = [col for col in df_copy[target_var].unique() if col != cat_ref]
-    df_copy[target_var] = df_copy[target_var].replace(rest_cat, 'Rest')
+    df_copy[target_var] = df_copy[target_var].replace(rest_cat, "Rest")
 
     # Calculating the total number of cases for reference and non-reference
     total_ref = df_copy[df_copy[target_var] == cat_ref].shape[0]
-    total_non_ref = df_copy[df_copy[target_var] == 'Rest'].shape[0]
+    total_non_ref = df_copy[df_copy[target_var] == "Rest"].shape[0]
 
     # Initializing lists to store results
     categories, woe_values = [], []
 
     # Calculating WoE for each category
     for cat in df_copy[feature].unique():
-        num_ref = df_copy[(df_copy[feature] == cat) & (df_copy[target_var] == cat_ref)].shape[0]
-        num_non_ref = df_copy[(df_copy[feature] == cat) & (df_copy[target_var] == 'Rest')].shape[0]
+        num_ref = df_copy[
+            (df_copy[feature] == cat) & (df_copy[target_var] == cat_ref)
+        ].shape[0]
+        num_non_ref = df_copy[
+            (df_copy[feature] == cat) & (df_copy[target_var] == "Rest")
+        ].shape[0]
 
         # Avoiding division by zero
         if num_ref == 0 or num_non_ref == 0:
@@ -243,25 +265,24 @@ def one_vs_rest_woe(df: pd.DataFrame, feature: str, target_var: str, cat_ref=Non
     total_iv = 0
 
     for cat, woe in zip(categories, woe_values):
-        num_ref_cat = df_copy[(df_copy[feature] == cat) & (df_copy[target_var] == cat_ref)].shape[0]
-        num_non_ref_cat = df_copy[(df_copy[feature] == cat) & (df_copy[target_var] == 'Rest')].shape[0]
+        num_ref_cat = df_copy[
+            (df_copy[feature] == cat) & (df_copy[target_var] == cat_ref)
+        ].shape[0]
+        num_non_ref_cat = df_copy[
+            (df_copy[feature] == cat) & (df_copy[target_var] == "Rest")
+        ].shape[0]
 
         prop_ref = num_ref_cat / total_ref if total_ref != 0 else 0
         prop_non_ref = num_non_ref_cat / total_non_ref if total_non_ref != 0 else 0
 
         iv = (prop_ref - prop_non_ref) * woe
         iv_values.append(iv)
-        total_iv += iv    
+        total_iv += iv
 
     # Creating the final DataFrame
-    woe_df = pd.DataFrame({
-        'Category': categories,
-        'WoE': woe_values,
-        'IV': iv_values
-    })
+    woe_df = pd.DataFrame({"Category": categories, "WoE": woe_values, "IV": iv_values})
 
     return woe_df, total_iv
-
 
 
 def cramers_v_bis(x: pd.Series, y: pd.Series) -> float:
@@ -304,6 +325,7 @@ def cramers_v_bis(x: pd.Series, y: pd.Series) -> float:
 
     return cramers_v_value
 
+
 def calculate_cramers_v_matrix(df: pd.DataFrame, sampling: bool = True) -> pd.DataFrame:
     """
     Calculate the Cramér's V correlation matrix for a DataFrame.
@@ -315,7 +337,7 @@ def calculate_cramers_v_matrix(df: pd.DataFrame, sampling: bool = True) -> pd.Da
     Returns:
     pd.DataFrame: A DataFrame representing the Cramér's V correlation matrix.
     """
-    #Create a copy of a DatFrame
+    # Create a copy of a DatFrame
     df_copy = df.copy()
     # Sample the DataFrame if sampling is True
     if sampling:
@@ -326,18 +348,25 @@ def calculate_cramers_v_matrix(df: pd.DataFrame, sampling: bool = True) -> pd.Da
 
     # Ordinal encoding of all columns
     for col in df_sampled.columns:
-        df_sampled[col] = df_sampled[col].astype('category').cat.codes
+        df_sampled[col] = df_sampled[col].astype("category").cat.codes
 
     # Apply cramers_v_bis for each pair of columns in the sampled DataFrame
-    corr_matrix = df_sampled.apply(lambda col1: df_sampled.apply(lambda col2: cramers_v_bis(col1, col2)))
+    corr_matrix = df_sampled.apply(
+        lambda col1: df_sampled.apply(lambda col2: cramers_v_bis(col1, col2))
+    )
 
     return corr_matrix
 
 
-
-def cluster_corr_matrix(corr_matrix: pd.DataFrame, threshold: float = 2.0, 
-                        linkage_method: str = 'ward', criterion: str = 'distance', 
-                        depth: int = 2, R: int = None, monocrit: int = None) -> pd.DataFrame:
+def cluster_corr_matrix(
+    corr_matrix: pd.DataFrame,
+    threshold: float = 2.0,
+    linkage_method: str = "ward",
+    criterion: str = "distance",
+    depth: int = 2,
+    R: int = None,
+    monocrit: int = None,
+) -> pd.DataFrame:
     """
     Reorganizes a correlation matrix based on hierarchical clustering of columns.
 
@@ -360,7 +389,9 @@ def cluster_corr_matrix(corr_matrix: pd.DataFrame, threshold: float = 2.0,
     Z = linkage(dissimilarity, method=linkage_method)
 
     # Form flat clusters
-    labels = fcluster(Z, t=threshold, criterion=criterion, depth=depth, R=R, monocrit=monocrit)
+    labels = fcluster(
+        Z, t=threshold, criterion=criterion, depth=depth, R=R, monocrit=monocrit
+    )
 
     # Create a mapping of column names to cluster labels
     column_clusters = {name: label for name, label in zip(corr_matrix.columns, labels)}
@@ -373,11 +404,18 @@ def cluster_corr_matrix(corr_matrix: pd.DataFrame, threshold: float = 2.0,
 
     return reorganized_corr_matrix
 
-def logistic_regression_summary(model: LogisticRegression, X: pd.DataFrame, y: np.ndarray, 
-                                columns: list[str] = None, intercept: bool = True, 
-                                multi_class: bool = False, cat: int = None) -> pd.DataFrame:
+
+def logistic_regression_summary(
+    model: LogisticRegression,
+    X: pd.DataFrame,
+    y: np.ndarray,
+    columns: list[str] = None,
+    intercept: bool = True,
+    multi_class: bool = False,
+    cat: int = None,
+) -> pd.DataFrame:
     """
-    This function takes a trained logistic regression model and training data X as input. 
+    This function takes a trained logistic regression model and training data X as input.
     It returns a table containing:
      - The intercept and all explanatory variables. The columns are: coef, std error, z, 'P>|z|', [0.025, 0.975]
      - If intercept is True, the intercept is added to X.
@@ -392,21 +430,20 @@ def logistic_regression_summary(model: LogisticRegression, X: pd.DataFrame, y: n
     cat: Specifies the category for which to calculate coefficients in a multi-class scenario.
 
     Returns:
-    pd.DataFrame: A table containing the coefficients, standard errors, z-values, p-values, 
+    pd.DataFrame: A table containing the coefficients, standard errors, z-values, p-values,
     and the lower and upper bounds of the 95% confidence interval.
     """
-    
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        
+
     scaler = StandardScaler()
     X_standardized = scaler.fit_transform(X)
-
 
     if intercept:
         X_mat = sm.add_constant(X_standardized)
         if multi_class and cat is not None:
-            cat_index = list(model.classes_).index(cat)  
+            cat_index = list(model.classes_).index(cat)
             model_coef = model.coef_[cat_index]
             model_coef = np.insert(model_coef, 0, model.intercept_[cat_index])
         else:
@@ -419,8 +456,9 @@ def logistic_regression_summary(model: LogisticRegression, X: pd.DataFrame, y: n
         else:
             model_coef = model.coef_[0]
 
-
-    p_one_minus_p_probs = np.product(model.predict_proba(X_standardized), axis=1).reshape(-1, 1)
+    p_one_minus_p_probs = np.product(
+        model.predict_proba(X_standardized), axis=1
+    ).reshape(-1, 1)
     cov_mat = np.linalg.pinv(np.dot((X_mat * p_one_minus_p_probs).T, X_mat))
     std_errors = np.sqrt(np.diag(cov_mat))
     z = model_coef / std_errors
@@ -428,21 +466,49 @@ def logistic_regression_summary(model: LogisticRegression, X: pd.DataFrame, y: n
     ci_low = stats.norm.ppf(0.025) * std_errors + model_coef
     ci_high = stats.norm.ppf(0.975) * std_errors + model_coef
 
-
     if columns and intercept:
-        summary = pd.DataFrame(index=["intercept"] + columns, columns=["coef", "std error", "z", "P>|z|", "[0.025", "0.975]"])
+        summary = pd.DataFrame(
+            index=["intercept"] + columns,
+            columns=["coef", "std error", "z", "P>|z|", "[0.025", "0.975]"],
+        )
     elif columns:
-        summary = pd.DataFrame(index=columns, columns=["coef", "std error", "z", "P>|z|", "[0.025", "0.975]"])
+        summary = pd.DataFrame(
+            index=columns,
+            columns=["coef", "std error", "z", "P>|z|", "[0.025", "0.975]"],
+        )
     else:
-        summary = pd.DataFrame(columns=["coef", "std error", "z", "P>|z|", "[0.025", "0.975]"])
+        summary = pd.DataFrame(
+            columns=["coef", "std error", "z", "P>|z|", "[0.025", "0.975]"]
+        )
     summary.index.name = "variable"
 
+    summary["coef"] = np.exp(
+        model_coef.reshape(
+            -1,
+        )
+    )
+    summary["std error"] = std_errors.reshape(
+        -1,
+    )
+    summary["z"] = z.reshape(
+        -1,
+    )
+    summary["P>|z|"] = p_values.reshape(
+        -1,
+    ).round(4)
+    summary["[0.025"] = np.exp(
+        ci_low.reshape(
+            -1,
+        )
+    )
+    summary["0.975]"] = np.exp(
+        ci_high.reshape(
+            -1,
+        )
+    )
 
-    summary["coef"] = np.exp(model_coef.reshape(-1,))
-    summary["std error"] = std_errors.reshape(-1,)
-    summary["z"] = z.reshape(-1,)
-    summary["P>|z|"] = p_values.reshape(-1,).round(4)
-    summary["[0.025"] = np.exp(ci_low.reshape(-1,))
-    summary["0.975]"] = np.exp(ci_high.reshape(-1,))
-
-    return summary.round(2)
+    return (
+        summary.round(2)
+        .reset_index()
+        .iloc[(-np.log(summary["coef"]).abs()).argsort()][0:10]
+    )
