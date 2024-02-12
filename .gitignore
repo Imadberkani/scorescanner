@@ -70,6 +70,7 @@ scorescanner.egg-info/
 __pycache__/
 # CMake
 cmake-build-*/
+*.pyc
 
 # Mongo Explorer plugin
 .idea/**/mongoSettings.xml
