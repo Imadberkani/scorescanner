@@ -3,13 +3,13 @@ import os
 
 print(find_packages())
 here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here,'REDAME.md'), encoding='utf-8') as f:
+with open(os.path.join(here,'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name="scorescanner",  
-    version="0.1.0",  
-    description="scorescanner helps you understand the main factors influencing the target of predictive tabular machine learning models.",  
+    version="0.1.1",  
+    description="scorescanner streamline the exploration and quantification of relationships between features and the target in a context of predictive Machine Learning models.",  
     long_description=long_description,  
     long_description_content_type="text/markdown",  
     author="Imad Berkani",  
