@@ -119,7 +119,7 @@ univariate_importance
 
 
 ```
-![Univariate Feature Importance](/_images/scorescanner/univariate_importance.png)
+![Univariate Feature Importance](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/category_importance.png)
 
 ### Identifying Highly Divergent Categories from target
 Now, we can identify the categories that diverge most from the target:
