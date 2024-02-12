@@ -119,7 +119,7 @@ univariate_importance
 
 
 ```
-![Univariate Feature Importance](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/category_importance.png)
+[![Univariate Feature Importance](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/category_importance.png)](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/univariate_importance.png)
 
 ### Identifying Highly Divergent Categories from target
 Now, we can identify the categories that diverge most from the target:
@@ -131,7 +131,7 @@ univariate_category_importance(
 )[0:30]
 
 ```
-![Univariate Feature Importance](/_images/scorescanner/univariate_importance.png)
+[![Univariate Feature Importance](/_images/scorescanner/univariate_importance.png)](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/category_importance.png)
 ### Visualisation
 Now, we can visualize the most important measures and statistical metrics of a variable in a bar plot:
 
