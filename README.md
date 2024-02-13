@@ -89,6 +89,10 @@ from scorescanner.preprocessing import (
     outlierdetector,
 )
 from sklearn.pipeline import Pipeline 
+```
+
+
+```python
 # Defining the pipeline steps
 pipeline_steps = [
     ('outlier_detection', outlierdetector(
@@ -100,7 +104,7 @@ pipeline_steps = [
     ('optimal_binning', multioptbinning(
         variables=num_features,
         target=target,
-        target_dtype="multiclass",
+        target_dtype="binary",
         outlier_value=outlier_value,
     ))
 ]
@@ -118,6 +122,8 @@ adult_data_binned = data_preprocessing_pipeline.transform(adult_data)
 adult_data_binned.head()
 
 ```
+
+
 ![Binned DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/binned_data.png)
 
 ### Univariate Feature Importance
