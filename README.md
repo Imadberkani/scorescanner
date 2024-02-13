@@ -1,6 +1,6 @@
 # ScoreScanner
 
-**ScoreScanner** is a Python library designed to accelerate and simplify the process of understanding and quantifying the relationship between features and the target variable in the context of predictive Machine Learning modeling.
+**ScoreScanner** is a Python library designed to accelerate and simplify the process of understanding and quantifying the relationship between features and the target variable in the context of predictive Machine Learning modeling on tabular datasets.
 
 ## Table of Contents
 - [Key Features](#key-features)
@@ -40,8 +40,25 @@ To start, let's import the "Adult" dataset from UCI, aimed at classifying indivi
 ```python
 
 import pandas as pd
+
 url = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
-columns = ['age', 'workclass', 'fnlwgt', 'education', 'education-num', 'marital-status', 'occupation', 'relationship', 'race', 'sex', 'capital-gain', 'capital-loss', 'hours-per-week', 'native-country', 'income']
+columns = [
+    "age",
+    "workclass",
+    "fnlwgt",
+    "education",
+    "education-num",
+    "marital-status",
+    "occupation",
+    "relationship",
+    "race",
+    "sex",
+    "capital-gain",
+    "capital-loss",
+    "hours-per-week",
+    "native-country",
+    "income",
+]
 adult_data = pd.read_csv(url, names=columns)
 
 ```
@@ -51,8 +68,7 @@ Now, we propose two preprocessing steps:
 - First, identifying and replacing outliers with extreme value.
 - Second, applying optimal binning of continuous variables, which includes creating unique categories for outliers and missing values.
 
-We can incorporate both steps into a Scikit-learn pipeline:
-
+##### Preprocessing parameters
 
 ```python
 
@@ -62,8 +78,17 @@ target='income'
 num_features=[col for col in columns if adult_data[col].dtypes in ['int64'] and col not in target]
 #Value to replace outliers
 outlier_value = -999.001
+```
+
+We can incorporate both steps into a Scikit-learn pipeline:
 
 
+```python
+from scorescanner.preprocessing import (
+    multioptbinning,
+    outlierdetector,
+)
+from sklearn.pipeline import Pipeline 
 # Defining the pipeline steps
 pipeline_steps = [
     ('outlier_detection', outlierdetector(
@@ -89,7 +114,11 @@ data_preprocessing_pipeline.fit(adult_data)
 # Transforming the data 
 adult_data_binned = data_preprocessing_pipeline.transform(adult_data)
 
+#Overview of binned DataFrame
+adult_data_binned.head()
+
 ```
+![Binned DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/binned_data.png)
 
 ### Univariate Feature Importance
 
@@ -119,7 +148,7 @@ univariate_importance
 
 
 ```
-![Description of the image](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/univariate_importance.png)
+![univariate importance](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/univariate_importance.png)
 
 
 ### Identifying Highly Divergent Categories from target
@@ -132,7 +161,7 @@ univariate_category_importance(
 )[0:30]
 
 ```
-![Description of the image](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/category_importance.png)
+![Category divergence](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/category_importance.png)
 
 ### Visualisation
 Now, we can visualize the most important measures and statistical metrics of a variable in a bar plot:
