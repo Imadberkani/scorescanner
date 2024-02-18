@@ -170,9 +170,9 @@ def generate_bar_plot(
             "yanchor": "top",
             "font": {"size": 20, "color": "black", "family": "Arial, sans-serif"},
         },
-        xaxis_title=feature,
-        yaxis_title="Count",
-        yaxis2_title="Percentage",
+        xaxis_title=f"<b>{feature}",
+        yaxis_title="<b>Count",
+        yaxis2_title="<b>Percentage",
         barmode="stack",
         hovermode="x",
         template="plotly_white",
@@ -247,13 +247,13 @@ def plot_woe(
     # Update layout with centered title and improved tooltip
     fig.update_layout(
         title={
-            "text": f"<b>Weight of Evidence for {feature}",
+            "text": f"<b>Weight of Evidence for {feature} feature",
             "x": 0.5,  # Center the title
             "xanchor": "center",
             "yanchor": "top",
         },
-        xaxis_title=feature,
-        yaxis_title="WoE",
+        xaxis_title=f"<b>{feature}",
+        yaxis_title="<b>WoE",
         template="plotly_white",
         hovermode="closest",  # Improve hover interaction
     )
@@ -323,13 +323,13 @@ def plot_js(df: pd.DataFrame, feature: str, target_var: str, colors=["#F7DC6F"])
     # Update layout with centered title and improved tooltip
     fig.update_layout(
         title={
-            "text": f"<b>Jensen-Shannon Divergence for {feature}",
+            "text": f"<b>Divergence from Target Categories: {feature}</b>",
             "x": 0.5,
             "xanchor": "center",
             "yanchor": "top",
         },
-        xaxis_title=feature,
-        yaxis_title="JS Distance",
+        xaxis_title=f"<b>{feature}",
+        yaxis_title="<b>JS Distance",
         template="plotly_white",
     )
 

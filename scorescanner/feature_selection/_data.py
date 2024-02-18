@@ -7,26 +7,34 @@ select_uncorrelated_features : Selects variables for a model while avoiding mult
 
 """
 
-#importing librairies
+# importing librairies
 import sys
 from pathlib import Path
+
 sys.path.append(str(Path.cwd()))
 import json
 import pandas as pd
 import numpy as np
-from scipy import stats 
+from scipy import stats
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 import statsmodels.api as sm
-
-
+from sklearn.preprocessing import LabelEncoder
 
 
 class variableselector:
     """
-    A class designed to select variables for modeling by evaluating their correlations and multicollinearity. 
+    A class designed to select variables for modeling by evaluating their correlations and multicollinearity.
     It supports Pearson correlation and Cramér's V for correlation measurement and VIF for multicollinearity.
     """
-    def __init__(self, target, corr_threshold=0.3, metric='cramers_v', use_vif=False, vif_threshold=1.5):
+
+    def __init__(
+        self,
+        target,
+        corr_threshold=0.3,
+        metric="cramers_v",
+        use_vif=False,
+        vif_threshold=1.5,
+    ):
         """
         Initialization of the VariableSelector class.
         Attributes:
@@ -46,7 +54,7 @@ class variableselector:
         self.selected_variables = []
         self.eliminated_variables_info = {}
 
-    def cramers_v(self,x: pd.Series, y: pd.Series) -> float:
+    def cramers_v(self, x: pd.Series, y: pd.Series) -> float:
         """
         Calculate the Cramér's V coefficient between two pd.Series.
 
@@ -91,22 +99,27 @@ class variableselector:
         Fits the selector to the DataFrame, performing correlation checks or VIF checks to select variables for modeling.
         """
         correlation_function = {
-            'pearson': lambda x, y: x.corr(y),
-            'cramers_v': self.cramers_v
+            "pearson": lambda x, y: x.corr(y),
+            "cramers_v": self.cramers_v,
         }.get(self.metric, None)
 
         if correlation_function is None:
             raise ValueError("Invalid metric. Choose 'pearson' or 'cramers_v'.")
 
-        correlation_with_target = df.drop(columns=[self.target]).apply(lambda x: correlation_function(x, df[self.target]))
+        # Creating a LabelEncoder object for the target
+        le = LabelEncoder()
+        df[self.target] = le.fit_transform(df[self.target])
+        correlation_with_target = df.drop(columns=[self.target]).apply(
+            lambda x: correlation_function(x, df[self.target])
+        )
         self.selected_variables = []
         self.eliminated_variables_info = {}
 
         for var in correlation_with_target.abs().sort_values(ascending=False).index:
             self._process_variable(df, var, correlation_function)
 
-        with open('eliminated_variables_info.json', 'w') as file:
-            json.dump(self.eliminated_variables_info, file)    
+        with open("eliminated_variables_info.json", "w") as file:
+            json.dump(self.eliminated_variables_info, file)
 
         return self
 
@@ -123,24 +136,33 @@ class variableselector:
                 temp_df = sm.add_constant(df[self.selected_variables + [var]])
 
                 # Calculate the VIF for the current variable
-                vif = variance_inflation_factor(temp_df.values, temp_df.columns.get_loc(var))
+                vif = variance_inflation_factor(
+                    temp_df.values, temp_df.columns.get_loc(var)
+                )
 
                 # Append the variable to the selected list if its VIF is below the threshold; otherwise, record its VIF
                 if vif < self.vif_threshold:
                     self.selected_variables.append(var)
                 else:
                     self.eliminated_variables_info[var] = vif
-        elif not self.use_vif:  # Si VIF n'est pas utilisé, procédez à la vérification de corrélation
-            if all(correlation_function(df[var], df[other_var]) < self.corr_threshold for other_var in self.selected_variables):
+        elif not self.use_vif:
+            if all(
+                correlation_function(df[var], df[other_var]) < self.corr_threshold
+                for other_var in self.selected_variables
+            ):
                 self.selected_variables.append(var)
-                self.eliminated_variables_info[var] = []  # Initialize an empty list for variables not eliminated due to VIF
+                self.eliminated_variables_info[var] = (
+                    []
+                )  # Initialize an empty list for variables not eliminated due to VIF
             else:
                 # Find the key variable which the current variable is most correlated with among the selected
-                key_var = max(self.selected_variables, key=lambda x: correlation_function(df[var], df[x]))
+                key_var = max(
+                    self.selected_variables,
+                    key=lambda x: correlation_function(df[var], df[x]),
+                )
                 # Add the variable to the group of the key variable
                 self.eliminated_variables_info.setdefault(key_var, []).append(var)
-        
-    
+
     def transform(self, df):
         """
         Returns a new DataFrame containing only the variables selected by the fit method.
@@ -153,4 +175,3 @@ class variableselector:
         """
         self.fit(df)
         return self.transform(df)
-

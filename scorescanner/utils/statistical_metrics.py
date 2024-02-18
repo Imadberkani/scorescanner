@@ -223,6 +223,11 @@ def one_vs_rest_woe(
     if target_var not in df.columns or feature not in df.columns:
         raise ValueError("Specified variables must be in the DataFrame")
 
+    if cat_ref is not None and cat_ref not in df[target_var].unique():
+        raise ValueError(
+            f"The specified reference category '{cat_ref}' is not a valid category in the target variable '{target_var}'."
+        )
+
     # Selecting a random category as reference if cat_ref is None
     if cat_ref is None:
         cat_ref = np.random.choice(df[target_var].unique())
@@ -506,9 +511,8 @@ def logistic_regression_summary(
             -1,
         )
     )
-
-    return (
-        summary.round(2)
-        .reset_index()
-        .iloc[(-np.log(summary["coef"]).abs()).argsort()][0:10]
+    summary = (
+        summary.round(2).reset_index().iloc[(-np.log(summary["coef"]).abs()).argsort()]
     )
+
+    return summary

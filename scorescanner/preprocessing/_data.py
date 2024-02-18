@@ -17,7 +17,7 @@ from optbinning import (
     MulticlassOptimalBinning,
     OptimalBinning,
 )
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from tqdm import tqdm
 
 
@@ -280,6 +280,11 @@ class multioptbinning:
         Parameters:
         df (pandas.DataFrame): The DataFrame containing the data to fit on.
         """
+        # Creating a LabelEncoder object for the target
+        le = LabelEncoder()
+        # Encoding the target
+        encoded_target = le.fit_transform(df[self.target].values)
+
         for variable in tqdm(self.variables, desc="Fitting OptimalBinning Models"):
             # Creating a dictionary of parameters for initializing the OptimalBinning object
             optb_params = {
@@ -319,8 +324,10 @@ class multioptbinning:
                 raise ValueError(
                     "Unsupported target_dtype: {}".format(self.target_dtype)
                 )
+            # Encoding a target
+
             # Fiting the OptimalBinning model
-            optb.fit(df[variable].values, df[self.target].values)
+            optb.fit(df[variable].values, encoded_target)
             # Storing the fitted OptimalBinning model in a dictionary
             self.optb_models[variable] = optb
 
@@ -436,7 +443,9 @@ class logisticregressionpreparer:
         Returns:
         pd.DataFrame: The transformed DataFrame.
         """
-        df_transformed = df.copy()
+        df_transformed = df[
+            [col for col in df.columns if col not in self.columns]
+        ].copy()
         for col, encoder in self.encoders.items():
             # transforming the column
             encoded_data = encoder.transform(df[[col]]).toarray()
@@ -455,8 +464,7 @@ class logisticregressionpreparer:
             # New DataFrame with encoded column
             df_encoded = pd.DataFrame(encoded_data, columns=col_names, index=df.index)
             # Dropping the original column
-            df_transformed = df_transformed.drop(col, axis=1).join(df_encoded)
-
+            df_transformed = pd.concat([df_encoded, df_transformed], axis=1)
         return df_transformed
 
     def fit_transform(self, df):
