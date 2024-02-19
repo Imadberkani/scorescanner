@@ -392,4 +392,4 @@ logistic_regression_report
 
 ```
 
-![model report](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/model_report.png)
+![model report](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/logisticregression_report.png)
