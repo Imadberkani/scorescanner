@@ -279,8 +279,9 @@ from scorescanner.preprocessing import logisticregressionpreparer
 adult_data_binned[features] = adult_data_binned[features].astype(str)
 # Dictionary for reference categories
 column_dict = {
-    "age": "(-inf, 21.50)",
-    "workclass": ' Private',
+    "education-num": "(-inf, 8.50)",
+    "capital-gain": "0.0",
+    "education": " HS-grad",
     
 }
 # Initializing the DataPreparerForLogisticRegression
@@ -322,7 +323,7 @@ from scorescanner.feature_selection import variableselector
 ```python
 # Initializing variableselector class
 selector_pearson = variableselector(
-    target="income", corr_threshold=0.3, metric="pearson", use_vif=False
+    target="income", corr_threshold=0.2, metric="pearson", use_vif=False
 )
 
 # Fitting variableselector to data
@@ -372,7 +373,7 @@ logreg = LogisticRegression(solver="newton-cholesky", random_state=42)
 logreg.fit(X_train, y_train)
 ```
 
-##### Fitting the model
+##### Logistic Regression Report 
 
 ```python
 from scorescanner.utils.statistical_metrics import logistic_regression_summary
