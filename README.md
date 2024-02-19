@@ -76,7 +76,8 @@ adult_data["occupation"] = adult_data["occupation"].mask(
 adult_data.head()
 
 ```
-![Adult DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/adult_data.png)
+<img src="https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/adult_data.png" width="500">
+
 
 ### Preprocessing
 
@@ -389,5 +390,7 @@ logistic_regression_report = logistic_regression_summary(
 
 logistic_regression_report
 
-![model report](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/model_report.png)
+
 ```
+
+![model report](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/model_report.png)
