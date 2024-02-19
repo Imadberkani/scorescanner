@@ -76,9 +76,7 @@ adult_data["occupation"] = adult_data["occupation"].mask(
 adult_data.head()
 
 ```
-<img src="https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/adult_data.png" width="600" height="300">
-
-
+![Adult DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/adult_data.png)
 
 ### Preprocessing
 
