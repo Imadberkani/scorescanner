@@ -144,9 +144,8 @@ adult_data_binned = data_preprocessing_pipeline.transform(adult_data)
 adult_data_binned.head()
 
 ```
-
-
 ![Binned DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/binned_data.png)
+
 
 ### Univariate Feature Importance
 
