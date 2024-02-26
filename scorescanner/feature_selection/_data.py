@@ -146,20 +146,15 @@ class variableselector:
                 else:
                     self.eliminated_variables_info[var] = vif
         elif not self.use_vif:
-            if all(
-                correlation_function(df[var], df[other_var]) < self.corr_threshold
-                for other_var in self.selected_variables
-            ):
+            correlations = df[self.selected_variables].apply(
+                lambda x: correlation_function(x, df[var])
+            )
+            if correlations.empty or correlations.abs().max() < self.corr_threshold:
                 self.selected_variables.append(var)
-                self.eliminated_variables_info[var] = (
-                    []
-                )  # Initialize an empty list for variables not eliminated due to VIF
+                self.eliminated_variables_info[var] = []
             else:
                 # Find the key variable which the current variable is most correlated with among the selected
-                key_var = max(
-                    self.selected_variables,
-                    key=lambda x: correlation_function(df[var], df[x]),
-                )
+                key_var = correlations.abs().idxmax()
                 # Add the variable to the group of the key variable
                 self.eliminated_variables_info.setdefault(key_var, []).append(var)
 
