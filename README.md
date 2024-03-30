@@ -38,41 +38,10 @@ pip install scorescanner
 To start, let's import the "Adult" dataset from UCI, aimed at classifying individuals based on whether their income exceeds $50K/year.
 
 ```python
+import os
+import scorescanner.data
 import pandas as pd
-
-url = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
-columns = [
-    "workclass",
-    "fnlwgt",
-    "education",
-    "education-num",
-    "marital-status",
-    "occupation",
-    "relationship",
-    "race",
-    "sex",
-    "capital-gain",
-    "capital-loss",
-    "hours-per-week",
-    "native-country",
-    "income",
-]
-adult_data = pd.read_csv(url, names=columns)
-adult_data["marital-status"] = adult_data["marital-status"].replace(
-    {" Married-AF-spouse": " Married-civ-spouse"}
-)
-adult_data["native-country"] = adult_data["native-country"].mask(
-    adult_data["native-country"].map(
-        adult_data["native-country"].value_counts(normalize=True)
-    )
-    < 0.02,
-    "Other",
-)
-adult_data["occupation"] = adult_data["occupation"].mask(
-    adult_data["occupation"].map(adult_data["occupation"].value_counts(normalize=True))
-    < 0.04,
-    "Other",
-)
+adult_data = pd.read_csv(os.path.join(os.path.dirname(scorescanner.data.__file__), 'adult_data.csv'),low_memory=False) 
 adult_data.head()
 
 ```
