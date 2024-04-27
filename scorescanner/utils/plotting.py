@@ -112,7 +112,7 @@ def generate_bar_plot(
     percent_cols = [f'percent_{col.split("_")[1]}' for col in count_cols]
 
     # Calculate Cramer's V and Information Value
-    cramers_v_value = cramers_v(df, feature, target_var)
+    cramers_v_value = cramers_v(df[feature], df[target_var])
     info_value = one_vs_rest_woe(
         df=df, feature=feature, target_var=target_var, cat_ref=cat_ref
     )[1]

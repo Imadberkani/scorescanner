@@ -5,7 +5,7 @@ Classes:
 
 - outlierdetector: A class for detecting and replacing outliers.
 - multioptbinning: A class for optimal binning.
-- logisticregressionpreparer: A class for preparing data for logistic regression.
+- logisticregressionpreparer: A class for preparing data for logistic regression modeling.
 
 """
 

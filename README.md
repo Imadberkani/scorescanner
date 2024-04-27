@@ -38,11 +38,17 @@ pip install scorescanner
 To start, let's import the "Adult" dataset from UCI, aimed at classifying individuals based on whether their income exceeds $50K/year.
 
 ```python
+
 import os
-import scorescanner.data
 import pandas as pd
-adult_data = pd.read_csv(os.path.join(os.path.dirname(scorescanner.data.__file__), 'adult_data.csv'),low_memory=False) 
+import scorescanner.data
+
+adult_data = pd.read_csv(
+    os.path.join(os.path.dirname(scorescanner.data.__file__), "adult_data.csv"),
+    low_memory=False,
+)
 adult_data.head()
+
 
 ```
 ![Adult DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/adult_data.png)
@@ -58,10 +64,13 @@ Now, we propose two preprocessing steps:
 ```python
 
 #Target
-target='income'
-#Numerical features
-num_features=[col for col in columns if adult_data[col].dtypes in ['int64'] and col not in target]
-#Value to replace outliers
+# Target
+target = "income"
+# Numerical features
+num_features = [
+    col for col in adult_data.columns if adult_data[col].dtypes in ['int64'] and col not in target
+]
+# Value to replace outliers
 outlier_value = -999.001
 ```
 
@@ -140,7 +149,7 @@ univariate_importance = univariate_feature_importance(
 )
 
 # Display the univariate feature importance
-univariate_importance
+univariate_importance.style.bar(subset=["Univariate_Importance"], color="#5f8fd6")
 
 
 ```

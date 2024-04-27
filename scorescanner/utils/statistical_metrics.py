@@ -9,8 +9,7 @@ calculate_js_distances : Calculate the Jensen-Shannon distance for each category
 univariate_category_importance : Calculate the Jensen-Shannon distance for each category of each categorical variable 
                                     in a DataFrame.           
 one_vs_rest_woe : Calculate the Weight of Evidence (WoE), considering a specific category as reference and grouping 
-                   the rest.          
-cramers_v_bis : Calculate the Cramér's V coefficient between two ""pd.Series"".       
+                   the rest.                
 calculate_cramers_v_matrix : Calculate the Cramér's V correlation matrix for a DataFrame.
 cluster_corr_matrix : Reorganizes a correlation matrix based on hierarchical clustering of columns.
 
@@ -29,46 +28,45 @@ from sklearn.preprocessing import StandardScaler
 import statsmodels.api as sm
 
 
-def cramers_v(df: pd.DataFrame, cat_var: str, target_var: str) -> float:
+def cramers_v(x: pd.Series, y: pd.Series) -> float:
     """
-    Calculate the Cramér's V coefficient to measure the association between
-    two categorical variables of a DataFrame.
+    Calculate the Cramér's V coefficient between two pd.Series.
 
     Parameters:
-    df (pd.DataFrame): A pandas DataFrame containing the data.
-    cat_var (str): The name of the first categorical variable in the DataFrame.
-    target_var (str): The name of the second categorical variable in the DataFrame.
+    x, y (pd.Series): Two pandas Series.
 
     Returns:
-    float: The Cramér's V coefficient, a number between 0 and 1, where 0 indicates
-    no association and 1 indicates a perfect association.
+    float: Calculated Cramér's V coefficient.
 
+    Note: This version will be used exclusively for Cramér's V correlation matrix calculations.
     """
 
-    # Checking if the variable are column of the dataframe
-    if cat_var not in df.columns or target_var not in df.columns:
-        raise ValueError("Specified variables must be in the DataFrame")
+    # Create a confusion matrix from the two Series
+    confusion_matrix = pd.crosstab(x, y)
 
-    # Creating a contingency table
-    contingency_table = pd.crosstab(df[cat_var], df[target_var])
-
-    # Calculating the chi-squared statistic
-    chi2 = stats.chi2_contingency(contingency_table)[0]
+    # Calculate the chi-squared statistic from the confusion matrix
+    chi2 = stats.chi2_contingency(confusion_matrix)[0]
 
     # Calculate the total number of observations
-    n = len(df)
+    n = confusion_matrix.sum().sum()
 
-    # Calculate the minimum of rows and columns in the contingency table
-    min_dim = min(contingency_table.shape)
+    # Calculate Phi2 (the chi-squared ratio to n)
+    phi2 = chi2 / n
 
-    # Avoid division by zero in case min_dim is 1
-    if min_dim == 1:
-        return 0.0
+    # Get the number of rows and columns of the confusion matrix
+    r, k = confusion_matrix.shape
 
-    # Calculate Cramer's V coefficient
-    cramers_v = np.sqrt(chi2 / (n * (min_dim - 1)))
+    # Calculate Phi2 corrected by subtracting a correction for matrix dimensions
+    phi2corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
 
-    return cramers_v
+    # Calculate corrections for the number of rows and columns
+    rcorr = r - ((r - 1) ** 2) / (n - 1)
+    kcorr = k - ((k - 1) ** 2) / (n - 1)
+
+    # Calculate the Cramér's V coefficient
+    cramers_v_value = np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
+
+    return cramers_v_value
 
 
 def univariate_feature_importance(
@@ -89,8 +87,8 @@ def univariate_feature_importance(
     sorted in descending order of importance.
     """
     # Supported methods
-    if method not in ["cramerv", "ppscore"]:
-        raise ValueError("Method must be 'cramerv' or 'ppscore'")
+    if method not in ["cramers_v", "ppscore"]:
+        raise ValueError("Method must be 'cramers_v' or 'ppscore'")
 
     importance_scores = []
     # Calculating 'cramerv' or 'ppscore' for each feature
@@ -98,8 +96,8 @@ def univariate_feature_importance(
         if feature not in df.columns or target_var not in df.columns:
             raise ValueError("Specified variables must be in the DataFrame")
 
-        if method == "cramerv":
-            score = cramers_v(df, feature, target_var)
+        if method == "cramers_v":
+            score = cramers_v(df[feature], df[target_var])
         elif method == "ppscore":
             score = pps.score(df, feature, target_var)["ppscore"]
 
@@ -113,7 +111,7 @@ def univariate_feature_importance(
         by="Univariate_Importance", ascending=False
     )
 
-    return importance_df.style.bar(subset=["Univariate_Importance"], color="#5f8fd6")
+    return importance_df
 
 
 def calculate_js_distances(
@@ -158,7 +156,7 @@ def calculate_js_distances(
     js_distances_df.reset_index(inplace=True)
     js_distances_df.rename(columns={feature: "Category"}, inplace=True)
 
-    return js_distances_df
+    return js_distances_df.sort_values(by="Jensen-Shannon Distance", ascending=False)
 
 
 def univariate_category_importance(
@@ -231,8 +229,7 @@ def one_vs_rest_woe(
     # Selecting a random category as reference if cat_ref is None
     if cat_ref is None:
         cat_ref = np.random.choice(df[target_var].unique())
-
-    print("The reference category:", cat_ref)
+        
     # Creating a copy of the DataFrame
     df_copy = df[[feature, target_var]].copy()
 
@@ -289,48 +286,6 @@ def one_vs_rest_woe(
 
     return woe_df, total_iv
 
-
-def cramers_v_bis(x: pd.Series, y: pd.Series) -> float:
-    """
-    Calculate the Cramér's V coefficient between two pd.Series.
-
-    Parameters:
-    x, y (pd.Series): Two pandas Series.
-
-    Returns:
-    float: Calculated Cramér's V coefficient.
-
-    Note: This version will be used exclusively for Cramér's V correlation matrix calculations.
-    """
-
-    # Create a confusion matrix from the two Series
-    confusion_matrix = pd.crosstab(x, y)
-
-    # Calculate the chi-squared statistic from the confusion matrix
-    chi2 = stats.chi2_contingency(confusion_matrix)[0]
-
-    # Calculate the total number of observations
-    n = confusion_matrix.sum().sum()
-
-    # Calculate Phi2 (the chi-squared ratio to n)
-    phi2 = chi2 / n
-
-    # Get the number of rows and columns of the confusion matrix
-    r, k = confusion_matrix.shape
-
-    # Calculate Phi2 corrected by subtracting a correction for matrix dimensions
-    phi2corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
-
-    # Calculate corrections for the number of rows and columns
-    rcorr = r - ((r - 1) ** 2) / (n - 1)
-    kcorr = k - ((k - 1) ** 2) / (n - 1)
-
-    # Calculate the Cramér's V coefficient
-    cramers_v_value = np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
-
-    return cramers_v_value
-
-
 def calculate_cramers_v_matrix(df: pd.DataFrame, sampling: bool = True) -> pd.DataFrame:
     """
     Calculate the Cramér's V correlation matrix for a DataFrame.
@@ -357,7 +312,7 @@ def calculate_cramers_v_matrix(df: pd.DataFrame, sampling: bool = True) -> pd.Da
 
     # Apply cramers_v_bis for each pair of columns in the sampled DataFrame
     corr_matrix = df_sampled.apply(
-        lambda col1: df_sampled.apply(lambda col2: cramers_v_bis(col1, col2))
+        lambda col1: df_sampled.apply(lambda col2: cramers_v(col1, col2))
     )
 
     return corr_matrix
