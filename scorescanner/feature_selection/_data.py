@@ -19,7 +19,7 @@ from scipy import stats
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 import statsmodels.api as sm
 from sklearn.preprocessing import LabelEncoder
-
+from scorescanner.utils.statistical_metrics import cramers_v
 
 class variableselector:
     """
@@ -34,6 +34,8 @@ class variableselector:
         metric="cramers_v",
         use_vif=False,
         vif_threshold=1.5,
+        json_dict_name = "eliminated_variables_info.json",
+        sample_size=None
     ):
         """
         Initialization of the VariableSelector class.
@@ -53,54 +55,19 @@ class variableselector:
         self.vif_threshold = vif_threshold
         self.selected_variables = []
         self.eliminated_variables_info = {}
+        self.json_dict_name = json_dict_name
+        self.sample_size = sample_size
 
-    def cramers_v(self, x: pd.Series, y: pd.Series) -> float:
-        """
-        Calculate the Cramér's V coefficient between two pd.Series.
-
-        Parameters:
-        x, y (pd.Series): Two pandas Series.
-
-        Returns:
-        float: Calculated Cramér's V coefficient.
-
-        Note: This version will be used exclusively for Cramér's V correlation matrix calculations.
-        """
-
-        # Create a confusion matrix from the two Series
-        confusion_matrix = pd.crosstab(x, y)
-
-        # Calculate the chi-squared statistic from the confusion matrix
-        chi2 = stats.chi2_contingency(confusion_matrix)[0]
-
-        # Calculate the total number of observations
-        n = confusion_matrix.sum().sum()
-
-        # Calculate Phi2 (the chi-squared ratio to n)
-        phi2 = chi2 / n
-
-        # Get the number of rows and columns of the confusion matrix
-        r, k = confusion_matrix.shape
-
-        # Calculate Phi2 corrected by subtracting a correction for matrix dimensions
-        phi2corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
-
-        # Calculate corrections for the number of rows and columns
-        rcorr = r - ((r - 1) ** 2) / (n - 1)
-        kcorr = k - ((k - 1) ** 2) / (n - 1)
-
-        # Calculate the Cramér's V coefficient
-        cramers_v_value = np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
-
-        return cramers_v_value
-
-    def fit(self, df):
+    def fit(self, df, y=None):
         """
         Fits the selector to the DataFrame, performing correlation checks or VIF checks to select variables for modeling.
         """
+        if self.sample_size is not None and self.sample_size < len(df):
+            df = df.sample(n=self.sample_size)
+            
         correlation_function = {
             "pearson": lambda x, y: x.corr(y),
-            "cramers_v": self.cramers_v,
+            "cramers_v": cramers_v,
         }.get(self.metric, None)
 
         if correlation_function is None:
@@ -118,7 +85,7 @@ class variableselector:
         for var in correlation_with_target.abs().sort_values(ascending=False).index:
             self._process_variable(df, var, correlation_function)
 
-        with open("eliminated_variables_info.json", "w") as file:
+        with open(self.json_dict_name, "w") as file:
             json.dump(self.eliminated_variables_info, file)
 
         return self
@@ -162,9 +129,9 @@ class variableselector:
         """
         Returns a new DataFrame containing only the variables selected by the fit method.
         """
-        return df[self.selected_variables]
+        return df[self.selected_variables + [self.target]]
 
-    def fit_transform(self, df):
+    def fit_transform(self, df, y=None):
         """
         Fits variableselector method and transforms the DataFrame in one step.
         """

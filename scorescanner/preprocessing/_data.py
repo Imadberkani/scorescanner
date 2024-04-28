@@ -392,13 +392,13 @@ class multioptbinning:
         return self.transform(df)
 
 
-class logisticregressionpreparer:
+class refcatencoder:
     """
     A class designed to prepare data for logistic regression. It applies one-hot encoding to specified columns
     of a DataFrame, with an option to selectively drop categories based on a provided dictionary.
     """
 
-    def __init__(self, columns, column_dict):
+    def __init__(self, columns=None, column_dict={}, target=None):
         """
         Initialize the logisticregressionpreparer with a list of columns and a column dictionary.
 
@@ -408,17 +408,22 @@ class logisticregressionpreparer:
                             If a column is not in this dictionary, the first category (based on nunique()) will be dropped.
         """
         # Initialization of class attributes
-        self.columns = columns
+        self.columns = columns 
         self.column_dict = column_dict
         self.encoders = {}
+        self.target = target
 
-    def fit(self, df):
+    def fit(self, df, y=None):
         """
         Fit the data preparer to the DataFrame.
 
         Parameters:
         df (pd.DataFrame): The DataFrame to fit the preparer on.
         """
+        # If columns is None, all columns in the DataFrame are used
+        if self.columns is None:
+            self.columns = [col for col in df.columns.tolist() if col not in self.target]
+
         for col in self.columns:
             # category to drop for each column
             categories_to_drop = (
@@ -459,7 +464,7 @@ class logisticregressionpreparer:
             col_names = [
                 f"{col}_{cat} (vs {reference_category})"
                 for cat in encoder.categories_[0]
-                if cat != reference_category
+                if cat != reference_category 
             ]
             # New DataFrame with encoded column
             df_encoded = pd.DataFrame(encoded_data, columns=col_names, index=df.index)
@@ -467,7 +472,7 @@ class logisticregressionpreparer:
             df_transformed = pd.concat([df_encoded, df_transformed], axis=1)
         return df_transformed
 
-    def fit_transform(self, df):
+    def fit_transform(self, df, y=None):
         """
         Fit and transform the DataFrame in one step.
 

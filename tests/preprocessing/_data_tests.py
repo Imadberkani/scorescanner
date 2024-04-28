@@ -23,7 +23,7 @@ import numpy as np
 from scorescanner.preprocessing import (
     outlierdetector,
     multioptbinning,
-    logisticregressionpreparer,
+    refcatencoder,
 )
 
 
@@ -369,7 +369,7 @@ class TestMultiOptBinning(unittest.TestCase):
             )
 
 
-class TestLogisticRegressionPreparer(unittest.TestCase):
+class TestLogisticrefcatencoder(unittest.TestCase):
     """
     A class to conduct tests for the LogisticRegressionPreparer class.
     """
@@ -393,7 +393,7 @@ class TestLogisticRegressionPreparer(unittest.TestCase):
         column_dict = {"feature1": "A", "feature2": "X"}
 
         # Initializing the LogisticRegressionPreparer with specified columns and column_dict
-        self.preparer = logisticregressionpreparer(
+        self.preparer = refcatencoder(
             columns=columns_to_encode, column_dict=column_dict
         )
 
