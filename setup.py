@@ -7,7 +7,7 @@ with open(os.path.join(here,'README.md'), encoding='utf-8') as f:
 
 setup(
     name="scorescanner",  
-    version="0.1.1",  
+    version="0.1.3",  
     description="scorescanner streamline the exploration and quantification of relationships between features and the target in a context of predictive Machine Learning models.",  
     long_description=long_description,  
     long_description_content_type="text/markdown",  
