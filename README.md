@@ -12,7 +12,9 @@
 - **Clarity:** Provides clear and quantifiable insights into the relationships between features and the target variable.
 
 **When to use ScoreScanner?**
+
 when you aim to:
+
 - Quickly identify the most significant features and gain a better understanding of their importance using statistical indicators.
 - Give meaning to missing values and outliers.
 - Perform optimal feature selection for interpretation.
