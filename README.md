@@ -1,6 +1,23 @@
-# ScoreScanner
+<h1 style="text-align: center;">ScoreScanner</h1>
 
-**ScoreScanner** is a Python library designed to accelerate and simplify the process of understanding and quantifying the relationship between features and the target variable in the context of predictive Machine Learning modeling on tabular datasets.
+## What is ScoreScanner ?
+
+**scorescanner** is a Python library designed to accelerate and simplify the process of understanding and quantifying the relationship between features and the target variable in the context of supervised predictive Machine Learning modeling on tabular datasets.
+
+## Why and When to Use ScoreScanner?
+
+**Why use ScoreScanner?**
+
+- **Efficiency:** Streamlines the exploration process, saving valuable time and effort.
+- **Clarity:** Provides clear and quantifiable insights into the relationships between features and the target variable.
+
+**When to use ScoreScanner?**
+when you aim to:
+    - Quickly identify the most significant features and gain a better understanding of their importance using statistical indicators.
+    - Give meaning to missing values and outliers.
+    - Perform optimal feature selection for interpretation.
+    - Create an interpretable initial model.
+    - Simplify communication with business teams 📢.
 
 ## Table of Contents
 - [Key Features](#key-features)
