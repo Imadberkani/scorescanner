@@ -17,6 +17,7 @@ from optbinning import (
     MulticlassOptimalBinning,
     OptimalBinning,
 )
+from hdbscan import HDBSCAN
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from tqdm import tqdm
 
@@ -217,6 +218,7 @@ class multioptbinning:
         min_event_rate_diff=0.02,
         outlier_value=-999.001,
         additional_optb_params=None,
+        hdbscan_params=None,
     ):
         """
         Initializes the multioptbinning class.
@@ -256,6 +258,8 @@ class multioptbinning:
 
         additional_optb_params (dict, optional): Additional parameters for OptimalBinning. For a full list of parameters, see the OptimalBinning documentation at [https://gnpalencia.org/optbinning/].
 
+        hdbscan_params (dict, optional): parameters for hdbscan clustering algorithm. For a full list of parameters, see the HDBSCAN documentation at [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html]).
+
         outlier_value (float, optional (default=-999.001)): The value of outliers.
         """
         # Initialization of class attributes
@@ -270,6 +274,7 @@ class multioptbinning:
         self.monotonic_trend = monotonic_trend
         self.min_event_rate_diff = min_event_rate_diff
         self.additional_optb_params = additional_optb_params or {}
+        self.hdbscan_params = hdbscan_params or {"min_samples": 2}
         self.outlier_value = outlier_value
         self.optb_models = {}
 
@@ -284,6 +289,10 @@ class multioptbinning:
         le = LabelEncoder()
         # Encoding the target
         encoded_target = le.fit_transform(df[self.target].values)
+
+        # Seting default min_cluster_size if not provided in hdbscan_params
+        default_min_cluster_size = max(int(0.05 * len(df)), 2)  
+        self.hdbscan_params.setdefault('min_cluster_size', default_min_cluster_size)
 
         for variable in tqdm(self.variables, desc="Fitting OptimalBinning Models"):
             # Creating a dictionary of parameters for initializing the OptimalBinning object
@@ -324,12 +333,20 @@ class multioptbinning:
                 raise ValueError(
                     "Unsupported target_dtype: {}".format(self.target_dtype)
                 )
-            # Encoding a target
-
+            
             # Fiting the OptimalBinning model
             optb.fit(df[variable].values, encoded_target)
-            # Storing the fitted OptimalBinning model in a dictionary
-            self.optb_models[variable] = optb
+            # Check if OptimalBinning found at least one split (meaning at least two bins)
+            if len(optb.splits) >= 1:
+                self.optb_models[variable] = ('optimalbinning', optb)
+            else:
+                # If fewer than two bins are found, we apply HBDSCAN
+                hdbscan_model = HDBSCAN(**self.hdbscan_params).fit(df[variable].values.reshape(-1, 1))
+                # Storing the HDBSCAN model instead of the OptimalBinning model
+                self.optb_models[variable] = ('HDBSCAN', hdbscan_model)
+                print(f"HDBSCAN was applied to the variable '{variable}' due to the lack of a significant relationship with the target variable.")
+
+    
 
     def transform(self, df):
         """
@@ -354,24 +371,32 @@ class multioptbinning:
         # Transforming each variable
         for variable in [v for v in self.variables if v not in binary_columns]:
             if variable in self.optb_models:
-                # Check the number of bins created for the variable
-                n_bins = len(self.optb_models[variable].splits) + 1
-                if n_bins > 1:
-                    # using the standard transformation if more than one bin
-                    transformed_df[variable] = self.optb_models[variable].transform(
-                        transformed_df[variable].values, metric="bins"
-                    )
-                else:
-                    # If only one bin, manually split the variable into two uniform intervals using quantiles
-                    quantiles = np.nanpercentile(
-                        transformed_df[variable], np.linspace(0, 100, 5)
-                    )
-                    transformed_df[variable] = pd.cut(
-                        transformed_df[variable],
-                        bins=quantiles,
-                        include_lowest=True,
-                        duplicates="drop",
-                    )
+                model_type, model = self.optb_models[variable]
+
+                # Check the type of the model and perform corresponding actions
+                if model_type == 'optimalbinning':
+                        # Using the standard transformation if more than one bin
+                        transformed_df[variable] = model.transform(
+                            transformed_df[variable].values, metric="bins"
+                        )
+                elif model_type == 'HDBSCAN':
+                    # Applying HDBSCAN labels
+                    # Creating mask for missing values in the dataset
+                    nan_mask = transformed_df[variable].isna()
+                    # Predicting labels using the HDBSCAN model
+                    labels = model.labels_
+                    # Customizing labels
+                    # Grouping data by the cluster labels
+                    unique_values = df[variable].groupby(labels).apply(lambda x: [-1] if x.name == -1 else x.unique())
+                    # Characterizing clusters with intervals for varied values or unique values for constant clusters
+                    custom_labels = unique_values.apply(lambda x: 'outliers' if -1 in x else f"[{x.min()},{x.max()}]" if x.min() != x.max() else f"{x.max()}")
+                   
+                    # Maping customized labels to the transformed data
+                    label_map = {idx: label for idx, label in zip(unique_values.index, custom_labels)}
+                    transformed_df[variable] = [label_map[label] for label in labels]
+                    
+                    # Replacing nan values with 'missing'
+                    transformed_df.loc[nan_mask, variable] = 'missing'
             else:
                 raise ValueError(f"Model not fitted for variable: {variable}")
         # Returns the DataFrame with the transformed variables.

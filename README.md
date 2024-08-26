@@ -8,18 +8,18 @@
 
 **Why use ScoreScanner?**
 
-- **Efficiency:** Streamlines the exploration process, saving valuable time and effort ⏱️.
-- **Clarity:** Provides clear and quantifiable insights into the relationships between features and the target variable 📊.
+- **Efficiency:** Streamlines the exploration process, saving valuable time and effort ⏱️
+- **Clarity:** Provides clear and quantifiable insights into the relationships between features and the target variable 
 
 **When to use ScoreScanner?**
 
 when you aim to:
 
-- Quickly identify the most significant features and gain a better understanding of their importance using statistical indicators.
-- Give meaning to missing values and outliers.
-- Perform optimal feature selection for interpretation.
-- Create an interpretable initial model.
-- Simplify communication with business teams 📢.
+- Quickly identify the most significant features and gain a better understanding of their importance using statistical indicators
+- Give meaning to missing values and outliers
+- Perform optimal feature selection for interpretation
+- Create an interpretable initial model
+- Simplify communication with business teams 📢
 
 ## Table of Contents
 - [Key Features](#key-features)
@@ -30,7 +30,7 @@ when you aim to:
 
 ### Preprocessing
 - **Outlier Identification & Replacement**: Automatically detecting and replacing outliers.
-- **Supervised Binning of Continuous Variables**: Converting continuous variables into categorical ones using supervised binning techniques for better interpretability.
+- **Supervised Binning of Continuous Variables**: Converting continuous variables into categorical ones using supervised binning techniques for better interpretability. If no significant relationship with the target is detected, an unsupervised clustering algorithm, HDBSCAN, is used.
 
 ### Feature Analysis
 - **Univariate Feature Importance**: Identifying the most impactful features on the target variable using statistical measures.
@@ -58,14 +58,25 @@ To start, let's import the "Adult" dataset from UCI, aimed at classifying indivi
 
 ```python
 
-import os
-import pandas as pd
-import scorescanner.data
+# Importing libraries
+import os  
+import pandas as pd  
+import numpy as np  
+import scorescanner.data  
 
+# Loading the adult dataset 
 adult_data = pd.read_csv(
     os.path.join(os.path.dirname(scorescanner.data.__file__), "adult_data.csv"),
-    low_memory=False,
+    low_memory=False,  
 )
+
+# Setting a seed 
+np.random.seed(42)
+
+# Adding a random column from discrete uniform distribution 
+adult_data['random_column'] = np.random.randint(0, 100, size=len(adult_data))  
+
+# Displaying first rows
 adult_data.head()
 
 
@@ -82,12 +93,11 @@ Now, we propose two preprocessing steps:
 
 ```python
 
-#Target
 # Target
 target = "income"
 # Numerical features
 num_features = [
-    col for col in adult_data.columns if adult_data[col].dtypes in ['int64'] and col not in target
+     col for col in adult_data.select_dtypes(include=np.number).columns.tolist() if adult_data[col].nunique() > 2
 ]
 # Value to replace outliers
 outlier_value = -999.001
@@ -258,6 +268,8 @@ plot_corr_matrix(corr_matrix_clustered)
 
 ```
 
+![corr DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/corr.png)
+
 ### Logistic Regression
 
 ##### Data Preparation
@@ -268,7 +280,7 @@ Now, we are going to use the `logisticregressionpreparer` class to prepare our d
 - Additionally, if we wish, we can define for each variable which category to remove, which will indirectly set our reference category. Otherwise, a category will be chosen randomly.
 
 ```python
-from scorescanner.preprocessing import logisticregressionpreparer
+from scorescanner.preprocessing import refcatencoder
 ```
 
 ```python
@@ -282,7 +294,7 @@ column_dict = {
     
 }
 # Initializing the DataPreparerForLogisticRegression
-data_preparer = logisticregressionpreparer(
+data_preparer = refcatencoder(
     columns=[col for col in features], column_dict=column_dict
 )
 # Applying the data preparation steps
@@ -369,6 +381,8 @@ from sklearn.linear_model import LogisticRegression
 logreg = LogisticRegression(solver="newton-cholesky", random_state=42)
 logreg.fit(X_train, y_train)
 ```
+
+![fit](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/logisticregression_sk.png)
 
 ##### Logistic Regression Report 
 

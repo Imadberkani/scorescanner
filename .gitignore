@@ -66,6 +66,7 @@ env/
 # Ignorer l'environnement
 lib_env/
 test_env/
+new_env/
 scorescanner.egg-info/
 __pycache__/
 # CMake
