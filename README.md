@@ -1,5 +1,10 @@
 <h1 style="text-align: center;">ScoreScanner</h1>
 
+<p align="center">
+  <img src="https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/logo.png" alt="ScoreScanner Logo" title="Logo de ScoreScanner">
+</p>
+
+
 ## What is ScoreScanner ?
 
 **scorescanner** is a Python library designed to accelerate and simplify the process of understanding and quantifying the relationship between features and the target variable in the context of supervised predictive Machine Learning modeling on tabular datasets.
