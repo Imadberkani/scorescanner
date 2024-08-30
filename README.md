@@ -86,7 +86,7 @@ adult_data.head()
 
 
 ```
-![Adult DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/adult_data.png)
+![Adult DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/adult_data_re.png)
 
 ### Preprocessing
 
@@ -156,7 +156,7 @@ adult_data_binned = data_preprocessing_pipeline.transform(adult_data)
 adult_data_binned.head()
 
 ```
-![Binned DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/binned_data.png)
+![Binned DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/binned_data_re.png)
 
 
 ### Univariate Feature Importance
