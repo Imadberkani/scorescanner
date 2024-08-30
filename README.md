@@ -1,4 +1,4 @@
-<h1 style="text-align: center;">ScoreScanner</h1>
+
 
 <p align="center">
   <img src="https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/logo.png" alt="ScoreScanner Logo" title="Logo de ScoreScanner">
