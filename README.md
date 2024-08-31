@@ -236,7 +236,7 @@ fig.show()
 
 ```
 
-<img src="https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/_bar_plot.png" alt="Bar plot" height="600" width="auto">
+<img src="https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/_bar_plot.png" alt="Bar plot" height="300" width="auto">
 
 
 The right axis represents the percentage, allowing us to visualize the evolution of each target modality across all bins.
