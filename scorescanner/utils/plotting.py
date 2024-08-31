@@ -82,6 +82,8 @@ def generate_bar_plot(
     target_var: str,
     cat_ref=None,
     colors=["#82E0AA", "#D2705E", "#5DADE2", "#F7DC6F", "#FDEDEC", "#F4D03F"],
+    width=1200,  
+    height=500
 ):
     """
     Generates a Plotly figure to visualize various statistics for a specified categorical feature
@@ -94,6 +96,8 @@ def generate_bar_plot(
     target_var (str): The name of the binary target variable.
     cat_ref (str, optional): The reference category for calculating Weight of Evidence (WoE).
                              If None, a category is chosen randomly.
+    width (int, optional): Width of the figure.
+    height (int, optional): Height of the figure.                         
 
     Returns:
     plotly.graph_objs._figure.Figure: A Plotly figure with a bar plot for counts of each category
@@ -173,7 +177,8 @@ def generate_bar_plot(
             "yanchor": "top",
             "font": {"size": 20, "color": "black", "family": "Arial, sans-serif"},
         },
-        height=500,
+        width=width,  
+        height=height,  
         xaxis_title=f"<b>{feature}",
         yaxis_title="<b>Total",
         yaxis2_title="<b>Percentage",
