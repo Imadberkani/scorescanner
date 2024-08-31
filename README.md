@@ -236,7 +236,7 @@ fig.show()
 
 ```
 
-<img src="https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/_bar_plot.png" alt="Bar plot" style="max-width: 250%; height:  250%;">
+<img src="https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/_bar_plot.png" alt="Bar plot" style="max-width: 250%; height:  450%;">
 
 
 
