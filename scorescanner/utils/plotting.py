@@ -81,7 +81,7 @@ def generate_bar_plot(
     feature: str,
     target_var: str,
     cat_ref=None,
-    colors=["#82E0AA", "#EC7063", "#5DADE2", "#F7DC6F", "#FDEDEC", "#F4D03F"],
+    colors=["#82E0AA", "#D2705E", "#5DADE2", "#F7DC6F", "#FDEDEC", "#F4D03F"],
 ):
     """
     Generates a Plotly figure to visualize various statistics for a specified categorical feature

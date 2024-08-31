@@ -208,6 +208,9 @@ univariate_category_importance(
 ```
 ![Category divergence](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/category_importance.png)
 
+The **Doctorate** category in the **education** feature shows the highest divergence from the overall distribution of the target feature, with a Jensen-Shannon distance of 0.36, indicating that the distribution of the target among individuals with a doctorate differs significantly from the overall target distribution compared to other categories.
+
+
 ### Visualisation
 Now, we can visualize the most important measures and statistical metrics of a variable in a bar plot:
 
