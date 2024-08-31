@@ -116,6 +116,7 @@ def generate_bar_plot(
     info_value = one_vs_rest_woe(
         df=df, feature=feature, target_var=target_var, cat_ref=cat_ref
     )[1]
+   
 
     # Create a Plotly subplot with a secondary y-axis for percentages.
     fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -130,16 +131,17 @@ def generate_bar_plot(
                 name=modalite,
                 marker=dict(color=color),
                 hoverinfo="all",
+                width=0.9,
                 hovertemplate=stats_df.apply(
                     lambda row: f"<b>{count_col}: {row[count_col]}<br>"
                     f"Percentage: {row[percent_col]:.2f}%<br>"
                     f"WoE: {row['WoE']:.2f}<br>"
-                    f"JS Distance: {row['Jensen-Shannon Distance']:.2f}",
+                    f"JS Distance: {row['Jensen-Shannon Distance']:.2f}<br>"
+                    f"Total Modality: {row['count']}<br>",
                     axis=1,
                 ),
                 text=stats_df.apply(
-                    lambda row: f"<b>{count_col}: {row[count_col]}<br>"
-                    f"Percentage: {row[percent_col]:.2f}%<br>",
+                    lambda row: f"<b>"f"Percent: {row[percent_col]:.2f}%<br>",
                     axis=1,
                 ),
                 customdata=stats_df[percent_col],
@@ -163,15 +165,17 @@ def generate_bar_plot(
     # Configuring the layout of the chart
     fig.update_layout(
         title={
-            "text": f"<b>Distribution of '{feature}'</b>",
+            "text": f"<b><span style='color: #6AA9A1;'>{target_var}</span> Distribution by <span style='color: #CF8374;'>{feature}</span></b>",
+            "y": 0.9,
             "y": 0.9,
             "x": 0.5,
             "xanchor": "center",
             "yanchor": "top",
             "font": {"size": 20, "color": "black", "family": "Arial, sans-serif"},
         },
+        bargap=0.01,
         xaxis_title=f"<b>{feature}",
-        yaxis_title="<b>Count",
+        yaxis_title="<b>Total",
         yaxis2_title="<b>Percentage",
         barmode="stack",
         hovermode="x",
