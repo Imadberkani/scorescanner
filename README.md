@@ -7,7 +7,7 @@
 
 ## What is ScoreScanner ? 📋
 
-**scorescanner** is a Python library designed to accelerate and simplify the process of understanding and quantifying the relationship between features and the target variable in the context of supervised predictive Machine Learning modeling on tabular datasets.
+**scorescanner** is a Python library designed to accelerate and simplify the process of understanding and quantifying the relationship between features and the target variable in the context of supervised predictive `Machine Learning` modeling on `tabular datasets`.
 
 ## Why and when to use ScoreScanner? 🤔
 
@@ -51,7 +51,7 @@ when you aim to:
 
 ## Installation
 
-To install ScoreScanner, you can use pip:
+To install `scorescanner`, you can use pip:
 
 ```bash
 pip install scorescanner
@@ -59,7 +59,7 @@ pip install scorescanner
 
 ## Quick Tutorial
 
-To start, let's import the "Adult" dataset from UCI, aimed at classifying individuals based on whether their income exceeds $50K/year.
+To start, let's import the "Adult" dataset from [UCI](https://archive.ics.uci.edu/dataset/2/adult), aimed at classifying individuals based on whether their income exceeds $50K/year.
 
 ```python
 
@@ -91,8 +91,8 @@ adult_data.head()
 ### Preprocessing
 
 Now, we propose two preprocessing steps:
-- First, identifying and replacing outliers with extreme value.
-- Second, applying optimal binning of continuous variables, which includes creating unique categories for outliers and missing values.
+- First, identifying and replacing `outliers` with `extreme value`.
+- Second, applying `optimal binning` of `continuous variables`, which includes creating unique categories for `outliers` and `missing values`.
 
 ##### Preprocessing parameters
 
@@ -108,7 +108,7 @@ num_features = [
 outlier_value = -999.001
 ```
 
-We can incorporate both steps into a Scikit-learn pipeline:
+We can incorporate both steps into a **Scikit-learn pipeline**:
 
 
 ```python
@@ -161,7 +161,7 @@ adult_data_binned.head()
 
 ### Univariate Feature Importance
 
-Now, we can identify the most impactful features on the target variable using the univariate importance method: 
+Now, we can identify the most `impactful features` on the `target` variable using the univariate importance method: 
 
 
 ```python
@@ -197,7 +197,7 @@ You can also use the Predictive Power Score (PPS) as an alternative metric for c
 
 
 ### Identifying Highly Divergent Categories from target
-Now, we can identify the categories that diverge most from the target:
+Now, we can identify the categories that `diverge` most from the target:
 
 ```python
 
@@ -208,11 +208,11 @@ univariate_category_importance(
 ```
 ![Category divergence](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/category_importance.png)
 
-The **Doctorate** category in the **education** feature shows the highest divergence from the overall distribution of the target feature, with a Jensen-Shannon distance of 0.36, indicating that the distribution of the target among individuals with a doctorate differs significantly from the overall target distribution compared to other categories.
+The `Doctorate` category in the `education` feature shows the highest divergence from the overall distribution of the target feature, with a Jensen-Shannon distance of `0.36`, indicating that the distribution of the target among individuals with a doctorate differs significantly from the overall target distribution compared to other categories.
 
 
 ### Visualisation
-Now, we can visualize the most important measures and statistical metrics of a variable in a bar plot:
+Now, we can visualize the most important `measures` and statistical `metrics` of a variable in a **bar plot**:
 
 ```python
 from scorescanner.utils.plotting import (
@@ -238,9 +238,9 @@ fig.show()
 
 ![Bar plot](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/_bar_plot.png)
 
-The right axis represents the percentage, allowing us to visualize the evolution of each target modality across all bins.
+The right axis represents the percentage, allowing us to visualize the evolution of each `target modality` across all `bins`.
 
-We can also focus on the Weight of Evidence or the Jensen-Shannon metrics.
+We can also focus on the **Weight of Evidence** or the **Jensen-Shannon metrics**.
 
 ```python
 
@@ -255,7 +255,7 @@ fig.show()
 ```
 ![woe plot](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/woe.png)
 
-A positive value of one-vs-rest WoE indicates that the reference category dominates in the respective bin, meaning that the presence of this reference category in an observation increases the likelihood of the reference category.
+A positive value of `one-vs-rest WoE` indicates that the `reference category` dominates in the respective bin, meaning that the presence of this reference category in an observation increases the `likelihood` of the `reference category`.
 ```python
 
 fig = plot_js(
@@ -268,7 +268,7 @@ fig.show()
 ```
 ![js plot](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/js.png)
 
-The larger the Jensen-Shannon distance between the probability distribution of the target and the probability distribution of the target's modalities within each bin, the more significant it is.
+The larger the `Jensen-Shannon distance` between the `overall distribution` of the target feature and the `distribution of the target within each bin`, the more `significant` the differences are.
 
 ### Feature Clustering
 
