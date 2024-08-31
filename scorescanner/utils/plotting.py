@@ -173,7 +173,7 @@ def generate_bar_plot(
             "yanchor": "top",
             "font": {"size": 20, "color": "black", "family": "Arial, sans-serif"},
         },
-        bargap=0.01,
+        height=600,
         xaxis_title=f"<b>{feature}",
         yaxis_title="<b>Total",
         yaxis2_title="<b>Percentage",
