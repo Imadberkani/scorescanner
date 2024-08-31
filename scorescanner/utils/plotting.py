@@ -174,6 +174,7 @@ def generate_bar_plot(
             "font": {"size": 20, "color": "black", "family": "Arial, sans-serif"},
         },
         height=500,
+        width = 1200,
         xaxis_title=f"<b>{feature}",
         yaxis_title="<b>Total",
         yaxis2_title="<b>Percentage",
