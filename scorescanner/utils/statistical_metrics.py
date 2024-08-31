@@ -38,7 +38,6 @@ def cramers_v(x: pd.Series, y: pd.Series) -> float:
     Returns:
     float: Calculated Cramér's V coefficient.
 
-    Note: This version will be used exclusively for Cramér's V correlation matrix calculations.
     """
 
     # Create a confusion matrix from the two Series
@@ -80,7 +79,7 @@ def univariate_feature_importance(
     df (pd.DataFrame): A pandas DataFrame containing the data.
     features (list): A list of feature names (str) to be evaluated.
     target_var (str): The name of the target variable.
-    method (str): The method to be used for calculating importance ('cramerv' or 'ppscore').
+    method (str): The method to be used for calculating importance ('cramers_v' or 'ppscore').
 
     Returns:
     pd.DataFrame: A DataFrame containing features and their corresponding importance scores,

@@ -177,6 +177,9 @@ def generate_bar_plot(
         hovermode="x",
         template="plotly_white",
         legend_title_text="Target Modalities",
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=True),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=True),
+        yaxis2=dict(showgrid=False, zeroline=False, showticklabels=True),
     )
 
     # Adding annotations for Cramer's V and Information Value

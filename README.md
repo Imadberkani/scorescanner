@@ -5,11 +5,11 @@
 </p>
 
 
-## What is ScoreScanner ?
+## What is ScoreScanner ? 📋
 
 **scorescanner** is a Python library designed to accelerate and simplify the process of understanding and quantifying the relationship between features and the target variable in the context of supervised predictive Machine Learning modeling on tabular datasets.
 
-## Why and when to use ScoreScanner?
+## Why and when to use ScoreScanner? 🤔
 
 **Why use ScoreScanner?**
 
@@ -33,11 +33,11 @@ when you aim to:
 
 ## Key Features
 
-### Preprocessing
+### Preprocessing 
 - **Outlier Identification & Replacement**: Automatically detecting and replacing outliers.
 - **Supervised Binning of Continuous Variables**: Converting continuous variables into categorical ones using supervised binning techniques for better interpretability. If no significant relationship with the target is detected, an unsupervised clustering algorithm, HDBSCAN, is used.
 
-### Feature Analysis
+### Feature Analysis 
 - **Univariate Feature Importance**: Identifying the most impactful features on the target variable using statistical measures.
 - **Divergent Category Identification**: Pinpoint the categories that deviate most from the target, providing deeper insights into data using Jensen-Shannon divergence.
 - **Feature Clustering:** Clustering Cramers'v correlation matrix.
@@ -166,6 +166,7 @@ Now, we can identify the most impactful features on the target variable using th
 
 ```python
 
+
 from scorescanner.utils.statistical_metrics import (
     univariate_feature_importance,
     univariate_category_importance,
@@ -175,19 +176,24 @@ from scorescanner.utils.statistical_metrics import (
 
 # Target variable and features list
 target = 'income'
-features = [col for col in columns if col not in target]
+features = [col for col in adult_data.columns if col not in target]
 
 # Calculate univariate feature importance
 univariate_importance = univariate_feature_importance(
-    df=adult_data_binned, features=features, target_var=target, method="cramerv"
+    df=adult_data_binned, features=features, target_var=target, method="cramers_v"
 )
 
 # Display the univariate feature importance
 univariate_importance.style.bar(subset=["Univariate_Importance"], color="#5f8fd6")
 
 
+
+
 ```
 ![univariate importance](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/univariate_importance.png)
+
+You can also use the Predictive Power Score (PPS) as an alternative metric for calculating univariate feature importance. For more detailed information, refer to the [documentation](https://pypi.org/project/ppscore/).
+
 
 
 ### Identifying Highly Divergent Categories from target
