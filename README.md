@@ -236,7 +236,7 @@ fig.show()
 
 ```
 
-![Bar plot](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/bar_plot.png)
+![Bar plot](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/__bar_plot.png)
 
 The right axis represents the percentage, allowing us to visualize the evolution of each target modality across all bins.
 
