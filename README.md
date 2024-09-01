@@ -7,23 +7,24 @@
 
 ## What is ScoreScanner ? 📋
 
-**scorescanner** is a Python library designed to accelerate and simplify the process of understanding and quantifying the relationship between features and the target variable in the context of supervised predictive `Machine Learning` modeling on `tabular datasets`.
+**scorescanner** is a Python library designed to accelerate and simplify the process of understanding and quantifying the relationship between `features` and the `target variable`
+ in the context of supervised predictive `Machine Learning` modeling on `tabular datasets`.
 
 ## Why and when to use ScoreScanner? 🤔
 
 **Why use ScoreScanner?**
 
 - **Efficiency:** Streamlines the exploration process, saving valuable time and effort ⏱️
-- **Clarity:** Provides clear and quantifiable insights into the relationships between features and the target variable 
+- **Clarity:** Provides clear and quantifiable insights into the relationships between features and the target variable 🔆
 
 **When to use ScoreScanner?**
 
 when you aim to:
 
-- Quickly identify the most significant features and gain a better understanding of their importance using statistical indicators
-- Give meaning to missing values and outliers
-- Perform optimal feature selection for interpretation
-- Create an interpretable initial model
+- Quickly identify the most significant features and gain a better understanding of their importance using statistical indicators and visualizations 📈
+- Give meaning to missing values and outliers 🔎
+- Perform optimal feature selection for interpretation ✔️
+- Create an interpretable initial model 🧠
 - Simplify communication with business teams 📢
 
 ## Table of Contents
@@ -33,20 +34,20 @@ when you aim to:
 
 ## Key Features
 
-### Preprocessing 
+### ⚙️ Preprocessing 
 - **Outlier Identification & Replacement**: Automatically detecting and replacing outliers.
 - **Supervised Binning of Continuous Variables**: Converting continuous variables into categorical ones using supervised binning techniques for better interpretability. If no significant relationship with the target is detected, an unsupervised clustering algorithm, HDBSCAN, is used.
 
-### Feature Analysis 
+### 🕵️‍♂️ Feature Analysis 
 - **Univariate Feature Importance**: Identifying the most impactful features on the target variable using statistical measures.
-- **Divergent Category Identification**: Pinpoint the categories that deviate most from the target, providing deeper insights into data using Jensen-Shannon divergence.
-- **Feature Clustering:** Clustering Cramers'v correlation matrix.
+- **Divergent Category Identification**: Pinpoint the categories that deviate most from the target, providing deeper insights into data using `Jensen-Shannon` divergence.
+- **Feature Clustering:** Clustering `Cramers'v` correlation matrix.
 
-### Feature Selection
+### ✔️ Feature Selection
 - **Multicollinearity Elimination**: Reducing multicollinearity to ensure that model's predictors are independent, enhancing the stability and interpretability of a model.
 - **Identifying Correlated Variable Subgroups:** Automatically grouping correlated variables, facilitating a nuanced interpretation of feature importance through the mean of absolute Shapley values.
 
-### Logistic Regression
+### 🤖 Logistic Regression
 - **Logistic Regression Report**: Generate detailed logistic regression reports, offering a clear view of how each independent variable influences the target.
 
 ## Installation
