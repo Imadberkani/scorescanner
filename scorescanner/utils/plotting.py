@@ -209,7 +209,13 @@ def generate_bar_plot(
 
 
 def plot_woe(
-    df: pd.DataFrame, feature: str, target_var: str, cat_ref=None, colors=["#9B59B6"]
+    df: pd.DataFrame,
+    feature: str,
+    target_var: str,
+    cat_ref=None,
+    colors=["#9B59B6"],
+    width=1200,  
+    height=500
 ):
     """
     Generates a Plotly figure to visualize the Weight of Evidence (WoE) for a specified categorical feature
@@ -221,6 +227,8 @@ def plot_woe(
     target_var (str): The name of the binary target variable.
     cat_ref (str, optional): The reference category for WoE calculation. If None, a category is chosen randomly.
     colors (list, optional): List of colors for the plot.
+    width (int, optional): Width of the figure.
+    height (int, optional): Height of the figure. 
 
     Returns:
     plotly.graph_objs._figure.Figure: A Plotly figure with a bar plot representing the WoE for each category in 'feature'.
@@ -264,6 +272,8 @@ def plot_woe(
             "xanchor": "center",
             "yanchor": "top",
         },
+        width=width,  
+        height=height,
         xaxis_title=f"<b>{feature}",
         yaxis_title="<b>WoE",
         template="plotly_white",
@@ -287,7 +297,14 @@ def plot_woe(
     return fig
 
 
-def plot_js(df: pd.DataFrame, feature: str, target_var: str, colors=["#F7DC6F"]):
+def plot_js(
+    df: pd.DataFrame,
+    feature: str,
+    target_var: str,
+    colors=["#C9AD44"],
+    width=1200,  
+    height=500
+    ):
     """
     Generates a Plotly figure to visualize the Jensen-Shannon Distance for each category
     of a specified categorical feature in relation to a binary target variable.
@@ -297,12 +314,17 @@ def plot_js(df: pd.DataFrame, feature: str, target_var: str, colors=["#F7DC6F"])
     variable (str): The name of the categorical variable.
     target_var (str): The name of the binary target variable.
     colors (list, optional): List of colors for the plot.
+    width (int, optional): Width of the figure.
+    height (int, optional): Height of the figure.
 
     Returns:
     plotly.graph_objs._figure.Figure: A Plotly figure with a bar plot representing the Jensen-Shannon Distance for each category in 'feature'.
     """
     # Calculate JS distances using calculate_js_distances function or similar
     js_df = calculate_js_distances(df, feature, target_var)
+    # Adding total and percentage 
+    js_df['Total'] = js_df['Category'].apply(lambda x: df[feature].value_counts().get(x, 0))
+    js_df['Percent'] = js_df['Category'].apply(lambda x: df[feature].value_counts(normalize=True).get(x, 0) * 100)
     # Separating 'Special' and 'Missing' categories
     special_missing_rows = js_df[js_df["Category"].isin(["Special", "Missing"])]
     final_stats = js_df[~js_df["Category"].isin(["Special", "Missing"])].sort_values(
@@ -322,11 +344,12 @@ def plot_js(df: pd.DataFrame, feature: str, target_var: str, colors=["#F7DC6F"])
             y=js_df["Jensen-Shannon Distance"],
             marker=dict(color=colors[0]),
             hoverinfo="text",  # Use text for hover information
-            text=js_df.apply(
-                lambda row: f"<b>JS: {row['Jensen-Shannon Distance']:.2f}", axis=1
-            ),
             hovertext=js_df.apply(
-                lambda row: f"<b>Category: {row['Category']}<br>JS: {row['Jensen-Shannon Distance']:.2f}",
+                lambda row: f"<b>JS: {row['Jensen-Shannon Distance']:.2f}<br>Total: {row['Total']}<br>Percent: {row['Percent']:.2f}%",
+                                 axis=1
+            ),
+            text=js_df.apply(
+                lambda row: f"<b>JS: {row['Jensen-Shannon Distance']:.2f}",
                 axis=1,
             ),
         )
@@ -340,6 +363,8 @@ def plot_js(df: pd.DataFrame, feature: str, target_var: str, colors=["#F7DC6F"])
             "xanchor": "center",
             "yanchor": "top",
         },
+        width=width,  
+        height=height,
         xaxis_title=f"<b>{feature}",
         yaxis_title="<b>JS Distance",
         template="plotly_white",
