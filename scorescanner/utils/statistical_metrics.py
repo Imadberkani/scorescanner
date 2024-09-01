@@ -186,7 +186,11 @@ def univariate_category_importance(
             raise ValueError("Specified variables must be in the DataFrame")
 
         js_distances_df = calculate_js_distances(df, cat_var, target_var)
+        print(js_distances_df)
         js_distances_df["Variable"] = cat_var
+        # Adding total and percentage 
+        js_distances_df['Total'] = js_distances_df['Category'].apply(lambda x: df[cat_var].value_counts().get(x, 0))
+        js_distances_df['Percent'] = js_distances_df['Category'].apply(lambda x: df[cat_var].value_counts(normalize=True).get(x, 0) * 100)
         all_distances.append(js_distances_df)
 
     # Concatenating all distance DataFrames

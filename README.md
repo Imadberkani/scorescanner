@@ -15,7 +15,7 @@
 **Why use ScoreScanner?**
 
 - **Efficiency:** Streamlines the exploration process, saving valuable time and effort ⏱️
-- **Clarity:** Provides clear and quantifiable insights into the relationships between features and the target variable 🔆
+- **Clarity:** Provides clear and quantifiable insights into the relationships between features and the target 🔆
 
 **When to use ScoreScanner?**
 
