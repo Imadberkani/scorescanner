@@ -346,7 +346,7 @@ def plot_js(
             x=js_df["Category"],
             y=js_df["Jensen-Shannon Distance"],
             marker=dict(color=colors[0]),
-            hoverinfo="text",  # Use text for hover information
+            hoverinfo="text",  
             hovertext=js_df.apply(
                 lambda row: f"<b>JS: {row['Jensen-Shannon Distance']:.2f}<br>Total: {row['Total']}<br>Percent: {row['Percent']:.2f}%",
                                  axis=1
@@ -397,7 +397,7 @@ def plot_corr_matrix(corr_matrix: pd.DataFrame, width: int = 1200, height: int =
             z=round(corr_matrix, 2),
             x=corr_matrix.columns,
             y=corr_matrix.columns,
-            colorscale="Tealgrn",
+            colorscale="YlGnBu",
             zmin=-1,
             zmax=1,
             hoverongaps=False,
@@ -408,7 +408,7 @@ def plot_corr_matrix(corr_matrix: pd.DataFrame, width: int = 1200, height: int =
     fig.update_layout(
         title={
             "text": "<b>Correlation Heatmap",
-            "x": 0.5,  # Center the title
+            "x": 0.5,  
             "xanchor": "center",
             "yanchor": "top",
         },
