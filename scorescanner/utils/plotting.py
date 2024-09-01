@@ -268,7 +268,7 @@ def plot_woe(
     fig.update_layout(
         title={
             "text": f"<b>Weight of Evidence for {feature} feature",
-            "x": 0.5,  # Center the title
+            "x": 0.5,  
             "xanchor": "center",
             "yanchor": "top",
         },
@@ -277,7 +277,10 @@ def plot_woe(
         xaxis_title=f"<b>{feature}",
         yaxis_title="<b>WoE",
         template="plotly_white",
-        hovermode="closest",  # Improve hover interaction
+        hovermode="closest",  
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=True),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=True),
+        yaxis2=dict(showgrid=False, zeroline=False, showticklabels=True),
     )
 
     # Adding annotation for Information Value
@@ -368,6 +371,9 @@ def plot_js(
         xaxis_title=f"<b>{feature}",
         yaxis_title="<b>JS Distance",
         template="plotly_white",
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=True),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=True),
+        yaxis2=dict(showgrid=False, zeroline=False, showticklabels=True),
     )
 
     return fig
