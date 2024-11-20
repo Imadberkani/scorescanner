@@ -1,16 +1,17 @@
 """
-preprocessing._data.py contains a set of classes to perform some preprocessing tasks.
+preprocessing._data.py contains a set of classes designed to perform essential preprocessing
+tasks that prepare the initial dataframe for detailed analysis and modeling.
 
 Classes:
 
-- outlierdetector: A class for detecting and replacing outliers.
+- outlierdetector: A class designed to process a DataFrame by detecting and replacing `outliers`
+                    in the numerical features specified by the `columns` parameter.
 - multioptbinning: A class for optimal binning.
 - logisticregressionpreparer: A class for preparing data for logistic regression modeling.
 
 """
 
 # Importing librairies
-import numpy as np
 import pandas as pd
 from optbinning import (
     ContinuousOptimalBinning,
@@ -20,23 +21,24 @@ from optbinning import (
 from hdbscan import HDBSCAN
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from tqdm import tqdm
+from typing import List, Union, Dict, Optional
 
 
 class outlierdetector:
     """
-    A class designed for detecting and replacing outliers in a dataset. It supports two methods for outlier detection:
-    the Interquartile Range (IQR) and the Z-score method. Additionally, it supports multiple methods for replacing outliers:
-    constant value, mean, median,...
+    A class designed to process a DataFrame by detecting and replacing `outliers` in the numerical features specified
+    by the `columns` parameter. It supports two methods for outlier detection: the Interquartile Range (IQR) and the Z-score method.
+    Additionally, it supports multiple methods for replacing outliers: constant value, mean, median,...
     """
 
     def __init__(
         self,
-        columns,
-        method="IQR",
-        replacement_method="constant",
-        replacement_value=-999.001,
-        z_threshold=3,
-    ):
+        columns: List[str],
+        method: str = "IQR",
+        replacement_method: Union[str, Dict[str, str]] = "constant",
+        replacement_value: Union[float, Dict[str, float]] = -999.001,
+        z_threshold: float = 3,
+    ) -> None:
         """
         Initialization of the outlierdetector class.
 
@@ -46,7 +48,7 @@ class outlierdetector:
         replacement_method (str or dict, optional (default='constant')): Method for replacing outliers ('constant', 'mean',
                                         'median', 'mode', 'std_dev' and 'capping_flooring'). If dict, specify method per column.
         replacement_value (float or dict, optional): Value to replace outliers if replacement method is 'constant'.
-                                        Default is -999.001. Ignored for other methods.
+                                        Default is -999.001. If dict, specify value per column. Ignored for other methods.
         z_threshold (float, optional (default=3)): Z-score threshold for outlier detection.
         bounds (dict): Dictionary to store lower and upper bounds for IQR method for each column.
         stats (dict): Dictionary to store mean and standard deviation for z-score method for each column.
@@ -57,17 +59,19 @@ class outlierdetector:
         self.replacement_method = replacement_method
         self.replacement_value = replacement_value
         self.z_threshold = z_threshold
-        self.bounds = {column: {"lower": None, "upper": None} for column in columns}
-        self.stats = {column: {"mean": None, "std_dev": None} for column in columns}
+        self.bounds: Dict[str, Dict[str, Optional[float]]] = {column: {"lower": None, "upper": None} for column in columns}
+        self.stats: Dict[str, Dict[str, Optional[float]]] = {column: {"mean": None, "std_dev": None} for column in columns}
 
-    def fit(self, df, y=None):
+    def fit(self, df: pd.DataFrame, y: Optional[pd.Series] = None) -> None:
         """
-        Fits the outlier detection method to the given DataFrame, determining threshold values for outliers in each specified column.
+        Fits the outlier detection method to the given DataFrame based on the defined method,
+        determining threshold values for outliers in each specified column.
 
         Parameters:
         df (pandas.DataFrame): The DataFrame containing the data to fit on.
         """
         for column in self.columns:
+            # Case of `Interquartile Range` method
             if self.method == "IQR":
                 # Calculate the first quartile (25th percentile)
                 Q1 = df[column].quantile(0.25)
@@ -79,14 +83,14 @@ class outlierdetector:
                 self.bounds[column]["lower"] = Q1 - 1.5 * IQR
                 # Define the upper bound for outlier detection
                 self.bounds[column]["upper"] = Q3 + 1.5 * IQR
-
+            # Case of `z-score` method
             elif self.method == "z-score":
                 # Calculate the mean of the column
                 self.stats[column]["mean"] = df[column].mean()
                 # Calculate the standard deviation of the column
                 self.stats[column]["std_dev"] = df[column].std()
 
-    def _is_outlier(self, value, column):
+    def _is_outlier(self, value: float, column: str) -> bool:
         """
         Checks if a value is an outlier based on the defined method.
 
@@ -97,12 +101,15 @@ class outlierdetector:
         Returns:
         bool: True if the value is an outlier, False otherwise.
         """
+        # Case of `Interquartile Range` method
         if self.method == "IQR":
             # Lower bound for IQR method
             lower = self.bounds[column]["lower"]
             # upper bound for IQR method
             upper = self.bounds[column]["upper"]
             return value < lower or value > upper
+        
+        # Case of `z-score` method
         elif self.method == "z-score":
             # mean for z-score method
             mean = self.stats[column]["mean"]
@@ -112,7 +119,7 @@ class outlierdetector:
         else:
             return False
 
-    def _replace_outlier(self, value, column, df):
+    def _replace_outlier(self, value: float, column: str, df: pd.DataFrame) -> float:
         """
         Function to replace outliers in a column based on the calculated bounds or statistics.
 
@@ -128,8 +135,11 @@ class outlierdetector:
         if self._is_outlier(value, column):
             # Selecting the replacement method based on the column if specified as a dictionary, otherwise using the global method
             if isinstance(self.replacement_method, dict):
+                # If it is a dictionary, retrieve the replacement method for the current column.
+                # Default to 'constant' if the column is not specified in the dictionary.
                 replacement_method = self.replacement_method.get(column, "constant")
             else:
+                # If replacement_method is not a dictionary, we will use the same replacement method for all columns.
                 replacement_method = self.replacement_method
 
             # Applying the specified replacement method
@@ -158,11 +168,16 @@ class outlierdetector:
                 return value
             else:
                 # If none of the above methods are specified, using a constant value for replacement
-                return self.replacement_value
+                ## Check if replacement_value is a dictionary and fetch the value for the current column if it is
+                if isinstance(self.replacement_value, dict):
+                    return self.replacement_value.get(column, -999.001)  
+                else:
+                    # If replacement_value is not a dictionary, we will use the same constant value for all columns.
+                    return self.replacement_value
         # If the value is not an outlier, return it unchanged
         return value
 
-    def transform(self, df):
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Applies the calculated outlier thresholds to the given DataFrame for each column and replaces outliers using apply method.
 
@@ -175,17 +190,20 @@ class outlierdetector:
         # Creating a copy of the input DataFrame
         df_copy = df.copy()
         for column in self.columns:
+            # Create a filtered DataFrame where the values that are not outliers are retained.
+            # This step isolates the non-outlier data, which can be used to estimate replacement values for the outliers.
             filtered_df = df_copy[
                 df_copy[column].apply(lambda x: not self._is_outlier(x, column))
             ]
             # replacing outliers with "outlier_value'
+            # Here, the method "_replace_outlier" uses the filtered non-outlier data for methods that require estimation
             df_copy[column] = df_copy[column].apply(
                 lambda value: self._replace_outlier(value, column, filtered_df)
             )
 
         return df_copy
 
-    def fit_transform(self, df, y=None):
+    def fit_transform(self, df: pd.DataFrame, y = None) -> pd.DataFrame:
         """
         Fits outilerdetection method and transforms the specified variables in one step.
 
@@ -195,7 +213,9 @@ class outlierdetector:
         Returns:
         pandas.DataFrame: The DataFrame with the specified variables transformed.
         """
+        # Fitting the outlier detection methods to the DataFrame
         self.fit(df)
+        # Transforming the DataFrame by replacing any identified outliers according to the specified replacement method
         return self.transform(df)
 
 
