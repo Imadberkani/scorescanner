@@ -231,10 +231,10 @@ class multioptbinning:
 
     def __init__(
         self,
-        features: list,
+        num_features: list,
+        cat_features: list,
         target: str,
         target_dtype: str = "binary",
-        dtype: str = "numerical",
         solver: str = "cp",
         prebinning_method: str = "cart",
         divergence: str = "iv",
@@ -249,12 +249,11 @@ class multioptbinning:
         Initializes the multioptbinning class.
 
         Parameters:
-        features (list of str): A list of column names to process for optimal binning.
+        num_features (list of str): A list of numerical features names to process for optimal binning.
+        cat_features (list of str): A list of categorical features names to process for optimal binning.
         target ( str): Name of target column.
         target_dtype (str, optional (default="binary")) - The data type of the target variable. Supported types are "binary", "continuous", and "multiclass".
-        dtype (str, optional (default="numerical")) – The variable data type. Supported data types are “numerical” for continuous and ordinal
-                                                      features and “categorical” for categorical and nominal features.
-
+        
         solver (str, optional (default="cp")) – The optimizer to solve the optimal binning problem. Supported solvers are “mip” to choose a
                                                 mixed-integer programming solver, “cp” to choose a constrained programming solver or “ls” to choose LocalSolver.
 
@@ -288,10 +287,10 @@ class multioptbinning:
         special_value (float, optional (default=-999.001)): A special value designated for outliers, for which a distinct category will be created.
         """
         # Initialization of class attributes
-        self.features = features
+        self.num_features = num_features
+        self.cat_features = cat_features
         self.target = target
         self.target_dtype = target_dtype
-        self.dtype = dtype
         self.solver = solver
         self.prebinning_method = prebinning_method
         self.divergence = divergence
@@ -302,6 +301,7 @@ class multioptbinning:
         self.hdbscan_params = hdbscan_params or {"min_samples": 2}
         self.special_value = special_value
         self.optb_models = {}
+        self.features= self.num_features + self.cat_features
 
     def fit(self, df: pd.DataFrame, y=None) -> None:
         """
@@ -318,12 +318,20 @@ class multioptbinning:
         # Seting default min_cluster_size if not provided in hdbscan_params
         default_min_cluster_size = max(int(0.05 * len(df)), 2)  
         self.hdbscan_params.setdefault('min_cluster_size', default_min_cluster_size)
-
+        
+    
         for variable in tqdm(self.features, desc="Fitting OptimalBinning Models"):
+            if variable in self.num_features:
+                dtype = "numerical"
+            elif variable in self.cat_features:
+                dtype = "categorical"
+            else:
+                raise ValueError(f"Variable '{variable}' not found in num_features or cat_features lists")
+
             # Creating a dictionary of parameters for initializing the OptimalBinning object
             optb_params = {
                 "name": variable,
-                "dtype": self.dtype,
+                "dtype": dtype,
                 "solver": self.solver,
                 "prebinning_method": self.prebinning_method,
                 "divergence": self.divergence,
@@ -365,11 +373,15 @@ class multioptbinning:
             if len(optb.splits) >= 1:
                 self.optb_models[variable] = ('optimalbinning', optb)
             else:
-                # If fewer than two bins are found, we apply HBDSCAN
-                hdbscan_model = HDBSCAN(**self.hdbscan_params).fit(df[variable].values.reshape(-1, 1))
-                # Storing the HDBSCAN model instead of the OptimalBinning model
-                self.optb_models[variable] = ('HDBSCAN', hdbscan_model)
-                print(f"HDBSCAN was applied to the variable '{variable}' due to the lack of a significant relationship with the target variable.")
+                if dtype == "numerical":
+                    # Apply HDBSCAN for numerical variables if fewer than two bins are found
+                    hdbscan_model = HDBSCAN(**self.hdbscan_params).fit(df[variable].values.reshape(-1, 1))
+                    self.optb_models[variable] = ('HDBSCAN', hdbscan_model)
+                    print(f"HDBSCAN was applied to the numerical variable '{variable}' due to the lack of significant splits.")
+                elif dtype == "categorical":
+                    # For categorical variables with fewer than two bins, record that no fitting was applied
+                    self.optb_models[variable] = ('no_binning_applied', None)
+                    print(f"No significant splits were found for the categorical variable '{variable}'; no binning was applied.")
 
     
 
@@ -422,6 +434,9 @@ class multioptbinning:
                     
                     # Replacing nan values with 'missing'
                     transformed_df.loc[nan_mask, variable] = 'missing'
+                elif model_type == 'no_binning_applied':
+                    # Keeping original values for categorical variables where no binning was applied
+                    transformed_df[variable] = df[variable]    
             else:
                 raise ValueError(f"Model not fitted for variable: {variable}")
         # Returns the DataFrame with the transformed features.
