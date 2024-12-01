@@ -5,8 +5,11 @@ tasks that prepare the initial dataframe for detailed analysis and modeling.
 Classes:
 
 - outlierdetector: A class designed to process a DataFrame by detecting and replacing `outliers`
-                    in the numerical features specified by the `columns` parameter.
-- multioptbinning: A class for optimal binning.
+                    in the numerical features specified by the `features` parameter.
+- multioptbinning: A class for transforming continuous features into categorical ones using optimal
+                   binning strategies across various feature types and target configurations. For Features
+                   where no significant relationship with the target is detected, an unsupervised clustering
+                   algorithm, `HDBSCAN`, is used.
 - logisticregressionpreparer: A class for preparing data for logistic regression modeling.
 
 """
@@ -33,7 +36,7 @@ class outlierdetector:
 
     def __init__(
         self,
-        columns: List[str],
+        features: List[str],
         method: str = "IQR",
         replacement_method: Union[str, Dict[str, str]] = "constant",
         replacement_value: Union[float, Dict[str, float]] = -999.001,
@@ -43,7 +46,7 @@ class outlierdetector:
         Initialization of the outlierdetector class.
 
         Attributes:
-        columns (list of str): List of columns to be processed for outlier detection.
+        features (list of str): List of features to be processed for outlier detection.
         method (str, optional (default='IQR')): Method for detecting outliers ('IQR' or 'z-score').
         replacement_method (str or dict, optional (default='constant')): Method for replacing outliers ('constant', 'mean',
                                         'median', 'mode', 'std_dev' and 'capping_flooring'). If dict, specify method per column.
@@ -54,13 +57,13 @@ class outlierdetector:
         stats (dict): Dictionary to store mean and standard deviation for z-score method for each column.
         """
         # Initialization of class attributes
-        self.columns = columns
+        self.features = features
         self.method = method
         self.replacement_method = replacement_method
         self.replacement_value = replacement_value
         self.z_threshold = z_threshold
-        self.bounds: Dict[str, Dict[str, Optional[float]]] = {column: {"lower": None, "upper": None} for column in columns}
-        self.stats: Dict[str, Dict[str, Optional[float]]] = {column: {"mean": None, "std_dev": None} for column in columns}
+        self.bounds: Dict[str, Dict[str, Optional[float]]] = {column: {"lower": None, "upper": None} for column in features}
+        self.stats: Dict[str, Dict[str, Optional[float]]] = {column: {"mean": None, "std_dev": None} for column in features}
 
     def fit(self, df: pd.DataFrame, y: Optional[pd.Series] = None) -> None:
         """
@@ -70,7 +73,7 @@ class outlierdetector:
         Parameters:
         df (pandas.DataFrame): The DataFrame containing the data to fit on.
         """
-        for column in self.columns:
+        for column in self.features:
             # Case of `Interquartile Range` method
             if self.method == "IQR":
                 # Calculate the first quartile (25th percentile)
@@ -139,7 +142,7 @@ class outlierdetector:
                 # Default to 'constant' if the column is not specified in the dictionary.
                 replacement_method = self.replacement_method.get(column, "constant")
             else:
-                # If replacement_method is not a dictionary, we will use the same replacement method for all columns.
+                # If replacement_method is not a dictionary, we will use the same replacement method for all features.
                 replacement_method = self.replacement_method
 
             # Applying the specified replacement method
@@ -172,7 +175,7 @@ class outlierdetector:
                 if isinstance(self.replacement_value, dict):
                     return self.replacement_value.get(column, -999.001)  
                 else:
-                    # If replacement_value is not a dictionary, we will use the same constant value for all columns.
+                    # If replacement_value is not a dictionary, we will use the same constant value for all features.
                     return self.replacement_value
         # If the value is not an outlier, return it unchanged
         return value
@@ -185,17 +188,17 @@ class outlierdetector:
         df (pandas.DataFrame): The DataFrame on which to apply the outlier thresholds.
 
         Returns:
-        pandas.DataFrame: The DataFrame with outliers replaced in the specified columns.
+        pandas.DataFrame: The DataFrame with outliers replaced in the specified features.
         """
         # Creating a copy of the input DataFrame
         df_copy = df.copy()
-        for column in self.columns:
+        for column in self.features:
             # Create a filtered DataFrame where the values that are not outliers are retained.
             # This step isolates the non-outlier data, which can be used to estimate replacement values for the outliers.
             filtered_df = df_copy[
                 df_copy[column].apply(lambda x: not self._is_outlier(x, column))
             ]
-            # replacing outliers with "outlier_value'
+            # replacing outliers with "special_value'
             # Here, the method "_replace_outlier" uses the filtered non-outlier data for methods that require estimation
             df_copy[column] = df_copy[column].apply(
                 lambda value: self._replace_outlier(value, column, filtered_df)
@@ -205,13 +208,13 @@ class outlierdetector:
 
     def fit_transform(self, df: pd.DataFrame, y = None) -> pd.DataFrame:
         """
-        Fits outilerdetection method and transforms the specified variables in one step.
+        Fits outilerdetection method and transforms the specified features in one step.
 
         Parameters:
         df (pandas.DataFrame): The DataFrame containing the data to fit and transform.
 
         Returns:
-        pandas.DataFrame: The DataFrame with the specified variables transformed.
+        pandas.DataFrame: The DataFrame with the specified features transformed.
         """
         # Fitting the outlier detection methods to the DataFrame
         self.fit(df)
@@ -221,34 +224,36 @@ class outlierdetector:
 
 class multioptbinning:
     """
-    A class for transforming a list of continuous variables into categorical variables using optimal binning.
+    A class for transforming continuous features into categorical ones using optimal binning strategies
+    across various feature types and target configurations. For Features where no significant relationship
+    with the target is detected, an unsupervised clustering algorithm, HDBSCAN, is used.
     """
 
     def __init__(
         self,
-        variables,
-        target,
-        target_dtype,
-        dtype="numerical",
-        solver="cp",
-        prebinning_method="cart",
-        divergence="iv",
-        min_n_bins=2,
-        monotonic_trend="auto",
-        min_event_rate_diff=0.02,
-        outlier_value=-999.001,
-        additional_optb_params=None,
-        hdbscan_params=None,
+        features: list,
+        target: str,
+        target_dtype: str = "binary",
+        dtype: str = "numerical",
+        solver: str = "cp",
+        prebinning_method: str = "cart",
+        divergence: str = "iv",
+        min_n_bins: int = 2,
+        monotonic_trend: str = "auto",
+        min_event_rate_diff: float = 0.02,
+        special_value: float = -999.001,
+        additional_optb_params: dict = None,
+        hdbscan_params: dict = None,
     ):
         """
         Initializes the multioptbinning class.
 
         Parameters:
-        variables (list of str): A list of column names to process for optimal binning.
+        features (list of str): A list of column names to process for optimal binning.
         target ( str): Name of target column.
         target_dtype (str, optional (default="binary")) - The data type of the target variable. Supported types are "binary", "continuous", and "multiclass".
         dtype (str, optional (default="numerical")) – The variable data type. Supported data types are “numerical” for continuous and ordinal
-                                                      variables and “categorical” for categorical and nominal variables.
+                                                      features and “categorical” for categorical and nominal features.
 
         solver (str, optional (default="cp")) – The optimizer to solve the optimal binning problem. Supported solvers are “mip” to choose a
                                                 mixed-integer programming solver, “cp” to choose a constrained programming solver or “ls” to choose LocalSolver.
@@ -280,10 +285,10 @@ class multioptbinning:
 
         hdbscan_params (dict, optional): parameters for hdbscan clustering algorithm. For a full list of parameters, see the HDBSCAN documentation at [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html]).
 
-        outlier_value (float, optional (default=-999.001)): The value of outliers.
+        special_value (float, optional (default=-999.001)): A special value designated for outliers, for which a distinct category will be created.
         """
         # Initialization of class attributes
-        self.variables = variables
+        self.features = features
         self.target = target
         self.target_dtype = target_dtype
         self.dtype = dtype
@@ -295,12 +300,12 @@ class multioptbinning:
         self.min_event_rate_diff = min_event_rate_diff
         self.additional_optb_params = additional_optb_params or {}
         self.hdbscan_params = hdbscan_params or {"min_samples": 2}
-        self.outlier_value = outlier_value
+        self.special_value = special_value
         self.optb_models = {}
 
-    def fit(self, df, y=None):
+    def fit(self, df: pd.DataFrame, y=None) -> None:
         """
-        Fits OptimalBinning models on the specified variables of the provided DataFrame.
+        Fits OptimalBinning models on the specified features of the provided DataFrame.
 
         Parameters:
         df (pandas.DataFrame): The DataFrame containing the data to fit on.
@@ -314,7 +319,7 @@ class multioptbinning:
         default_min_cluster_size = max(int(0.05 * len(df)), 2)  
         self.hdbscan_params.setdefault('min_cluster_size', default_min_cluster_size)
 
-        for variable in tqdm(self.variables, desc="Fitting OptimalBinning Models"):
+        for variable in tqdm(self.features, desc="Fitting OptimalBinning Models"):
             # Creating a dictionary of parameters for initializing the OptimalBinning object
             optb_params = {
                 "name": variable,
@@ -325,7 +330,7 @@ class multioptbinning:
                 "min_n_bins": self.min_n_bins,
                 "monotonic_trend": self.monotonic_trend,
                 "min_event_rate_diff": self.min_event_rate_diff,
-                "special_codes": [self.outlier_value],
+                "special_codes": [self.special_value],
                 **self.additional_optb_params,
             }
             # Creating an instance of OptimalBinning for binary targets
@@ -370,26 +375,26 @@ class multioptbinning:
 
     def transform(self, df):
         """
-        Transforms the specified variables of the given DataFrame using the fitted OptimalBinning models.
+        Transforms the specified features of the given DataFrame using the fitted OptimalBinning models.
 
         Parameters:
         df (pandas.DataFrame): The DataFrame on which to apply the transformations.
 
         Returns:
-        pandas.DataFrame: The DataFrame with the specified variables transformed.
+        pandas.DataFrame: The DataFrame with the specified features transformed.
         """
         # Creating a copy of the initial dataframe
         transformed_df = df.copy()
-        # Identify binary columns
-        binary_columns = [
-            col for col in df.columns if len(df[col].dropna().unique()) == 2
+        # Identify binary features
+        binary_features = [
+            col for col in df.features if len(df[col].dropna().unique()) == 2
         ]
-        transformed_df[binary_columns] = transformed_df[binary_columns].applymap(
-            lambda x: "Special" if x == self.outlier_value else x
+        transformed_df[binary_features] = transformed_df[binary_features].applymap(
+            lambda x: "Special" if x == self.special_value else x
         )
 
         # Transforming each variable
-        for variable in [v for v in self.variables if v not in binary_columns]:
+        for variable in [v for v in self.features if v not in binary_features]:
             if variable in self.optb_models:
                 model_type, model = self.optb_models[variable]
 
@@ -419,21 +424,21 @@ class multioptbinning:
                     transformed_df.loc[nan_mask, variable] = 'missing'
             else:
                 raise ValueError(f"Model not fitted for variable: {variable}")
-        # Returns the DataFrame with the transformed variables.
+        # Returns the DataFrame with the transformed features.
         return transformed_df
 
     def fit_transform(self, df, y=None):
         """
-        Fits OptimalBinning models and transforms the specified variables in one step.
+        Fits OptimalBinning models and transforms the specified features in one step.
 
         Parameters:
         df (pandas.DataFrame): The DataFrame containing the data to fit and transform.
 
         Returns:
-        pandas.DataFrame: The DataFrame with the specified variables transformed.
+        pandas.DataFrame: The DataFrame with the specified features transformed.
         """
         self.fit(df)
-        # Returns the DataFrame with the transformed variables.
+        # Returns the DataFrame with the transformed features.
         return self.transform(df)
 
 

@@ -46,7 +46,7 @@ class TestOutlierDetector:
     def test_iqr_constant_replacement(self, setup_dataframe, method):
         """Test outlier detection with IQR and z-score methods with constant value replacement"""
         df = setup_dataframe
-        detector = outlierdetector(columns=['A', 'B', 'C'], method=method, replacement_method='constant', replacement_value=-999.001)
+        detector = outlierdetector(features=['A', 'B', 'C'], method=method, replacement_method='constant', replacement_value=-999.001)
         transformed_df = detector.fit_transform(df)
 
         # Check that the last value in column 'A' (expected to be an outlier) has been replaced with -999.001
@@ -66,7 +66,7 @@ class TestOutlierDetector:
         replacement_values = {'A': -999.001, 'C': -999.001, 'D': None}  
 
         detector = outlierdetector(
-            columns=['A', 'B', 'C', 'D'],
+            features=['A', 'B', 'C', 'D'],
             method=method,
             replacement_method=replacement_methods,
             replacement_value=replacement_values
