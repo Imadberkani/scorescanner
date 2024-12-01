@@ -99,11 +99,16 @@ Now, we propose two preprocessing steps:
 
 ```python
 
+
 # Target
 target = "income"
 # Numerical features
 num_features = [
      col for col in adult_data.select_dtypes(include=np.number).columns.tolist() if adult_data[col].nunique() > 2
+]
+# Categorical features
+cat_features = [
+    "marital-status"
 ]
 # Value to replace outliers
 outlier_value = -999.001
@@ -136,7 +141,8 @@ pipeline_steps = [
     (
         "optimal_binning",
         multioptbinning(
-            features=num_features,
+            num_features=num_features,
+            cat_features=cat_features,
             target=target,
             target_dtype="binary",
             special_value=outlier_value,
@@ -155,6 +161,7 @@ adult_data_binned = data_preprocessing_pipeline.transform(adult_data)
 
 #Overview of binned DataFrame
 adult_data_binned.head()
+
 
 ```
 ![Binned DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/binned_data_re.png)
