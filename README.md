@@ -127,7 +127,7 @@ pipeline_steps = [
     (
         "outlier_detection",
         outlierdetector(
-            columns=num_features,
+            features=num_features,
             method="IQR",
             replacement_method="constant",
             replacement_value=outlier_value,
@@ -136,10 +136,10 @@ pipeline_steps = [
     (
         "optimal_binning",
         multioptbinning(
-            variables=num_features,
+            features=num_features,
             target=target,
             target_dtype="binary",
-            outlier_value=outlier_value,
+            special_value=outlier_value,
         ),
     ),
 ]
