@@ -85,3 +85,48 @@ class TestOutlierDetector:
 
         # Check that no changes were made to column 'B' since there are no outliers
         assert all(transformed_df['B'] == df['B']), "No changes should be made to column B since there are no outliers"    
+
+
+class Testmultioptbinning:
+    @pytest.fixture
+    def setup_data(self):
+        """Generate a single sample dataframe for all classification types."""
+        np.random.seed(0)
+        data = {
+            'numerical1': np.random.normal(loc=10, scale=3, size=100),
+            'numerical2': np.random.uniform(low=0, high=1, size=100),
+            'binary_target': np.random.choice([0, 1], size=100),
+            'continuous_target': np.random.normal(loc=50, scale=10, size=100),
+            'multiclass_target': np.random.choice([0, 1, 2], size=100),  
+            'categorical1': np.random.choice(['A', 'B', 'C'], size=100)  
+        }
+        return pd.DataFrame(data)
+
+    @pytest.mark.parametrize("target_column, target_dtype, num_features, cat_features", [
+        ('binary_target', 'binary', ['numerical1', 'numerical2'], ['categorical1']),
+        ('continuous_target', 'continuous', ['numerical1', 'numerical2'], ['categorical1']),
+        ('multiclass_target', 'multiclass', ['numerical1', 'numerical2'], [])
+    ])
+    def test_multioptbinning(self, setup_data, target_column, target_dtype, num_features, cat_features):
+        """Test multioptbinning across different target scenarios."""
+        df = setup_data
+        target = target_column
+       
+
+        binning = multioptbinning(
+            num_features=num_features,
+            cat_features=cat_features,
+            target=target,
+            target_dtype=target_dtype,
+        )
+        binning.fit(df)
+        transformed_df = binning.transform(df)
+
+       
+        assert not transformed_df.isnull().values.any(), "No nulls should be in the transformed dataframe"
+        assert set(transformed_df.columns).issuperset(num_features + cat_features), "All original features should be present in the transformed dataframe"
+        for num_feature in num_features:
+            assert transformed_df[num_feature].nunique() >= 2, f"{num_feature} should have at least 2 unique values post-binning"
+            
+
+           

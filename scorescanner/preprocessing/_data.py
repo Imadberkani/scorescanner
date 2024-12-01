@@ -356,6 +356,8 @@ class multioptbinning:
                 )
             # Creating an instance of OptimalBinning for multiclass targets
             elif self.target_dtype == "multiclass":
+                if variable not in self.num_features:
+                    raise ValueError(f"Multiclass target type does not support categorical feature '{variable}'. Only numerical features are allowed.")
                 optb = MulticlassOptimalBinning(
                     **{
                         key: value
