@@ -387,7 +387,7 @@ class multioptbinning:
         transformed_df = df.copy()
         # Identify binary features
         binary_features = [
-            col for col in df.features if len(df[col].dropna().unique()) == 2
+            col for col in df.columns if len(df[col].dropna().unique()) == 2
         ]
         transformed_df[binary_features] = transformed_df[binary_features].applymap(
             lambda x: "Special" if x == self.special_value else x
