@@ -437,6 +437,7 @@ class multioptbinning:
         Returns:
         pandas.DataFrame: The DataFrame with the specified features transformed.
         """
+        # Fitting the optbinning methods to the DataFrame
         self.fit(df)
         # Returns the DataFrame with the transformed features.
         return self.transform(df)
