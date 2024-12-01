@@ -35,7 +35,7 @@ jobs:
         run: pip install -r requirements-test.txt    
 
     - name: Run tests
-      run: pytest tests
+        run: pytest tests
 
     - name: Deploy to PyPI
       if: github.event_name == 'release' && matrix.python-version == '3.9'
