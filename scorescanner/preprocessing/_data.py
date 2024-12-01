@@ -215,7 +215,7 @@ class outlierdetector:
         """
         # Fitting the outlier detection methods to the DataFrame
         self.fit(df)
-        # Transforming the DataFrame by replacing any identified outliers according to the specified replacement method
+        # Transforming the DataFrame by replacing any identified outliers according to the specified replacement method 
         return self.transform(df)
 
 
