@@ -280,11 +280,12 @@ class multioptbinning:
         min_event_rate_diff (float, optional (default=0)) – The minimum event rate difference between consecutives bins. For solver “ls”, this option currently only applies when monotonic_trend
                                                              is “ascending”, “descending”, “peak_heuristic” or “valley_heuristic”.
 
+        special_value (float, optional (default=-999.001)): A special value designated for outliers, for which a distinct category will be created.                                                     
+
         additional_optb_params (dict, optional): Additional parameters for OptimalBinning. For a full list of parameters, see the OptimalBinning documentation at [https://gnpalencia.org/optbinning/].
 
         hdbscan_params (dict, optional): parameters for hdbscan clustering algorithm. For a full list of parameters, see the HDBSCAN documentation at [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html]).
 
-        special_value (float, optional (default=-999.001)): A special value designated for outliers, for which a distinct category will be created.
         """
         # Initialization of class attributes
         self.num_features = num_features
