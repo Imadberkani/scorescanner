@@ -7,7 +7,7 @@ Classes:
 - outlierdetector: A class designed to process a DataFrame by detecting and replacing `outliers`
                     in the numerical features specified by the `features` parameter.
 - multioptbinning: A class for transforming continuous features into categorical ones using optimal
-                   binning strategies across various feature types and target configurations. For Features
+                   binning strategies across various feature types and target configurations. For numerical features
                    where no significant relationship with the target is detected, an unsupervised clustering
                    algorithm, `HDBSCAN`, is used.
 - logisticregressionpreparer: A class for preparing data for logistic regression modeling.
