@@ -73,7 +73,8 @@ def univariate_feature_importance(
 ) -> pd.DataFrame:
     """
     Calculate and rank features based on their importance using either Cramér's V or Predictive Power Score (PPS)
-    in relation to a target variable, depending on the chosen method.
+    in relation to a target variable, depending on the chosen method. For Cramér's V, p-values are also provided
+    to assess the statistical significance of the associations.
 
     Parameters:
     df (pd.DataFrame): A pandas DataFrame containing the data.
@@ -82,35 +83,40 @@ def univariate_feature_importance(
     method (str): The method to be used for calculating importance ('cramers_v' or 'ppscore').
 
     Returns:
-    pd.DataFrame: A DataFrame containing features and their corresponding importance scores,
-    sorted in descending order of importance.
+    pd.DataFrame: A DataFrame containing features, their corresponding importance scores, and p-values
+                  (for Cramér's V), sorted in descending order of importance.
     """
-    # Supported methods
+    # Ensure method is supported
     if method not in ["cramers_v", "ppscore"]:
         raise ValueError("Method must be 'cramers_v' or 'ppscore'")
 
     importance_scores = []
-    # Calculating 'cramerv' or 'ppscore' for each feature
+    # Calculate importance scores for each feature using the specified method
     for feature in features:
+        # Ensure specified variables are in the DataFrame
         if feature not in df.columns or target_var not in df.columns:
             raise ValueError("Specified variables must be in the DataFrame")
 
         if method == "cramers_v":
-            score = cramers_v(df[feature], df[target_var])
+            # Calculate Cramér's V and p-value
+            score, p_value = cramers_v(df[feature], df[target_var])
+            # Display p-values below 0.01 as '<0.01'
+            display_p_value = "<0.01" if p_value < 0.01 else p_value
+            importance_scores.append((feature, score, display_p_value))
         elif method == "ppscore":
             score = pps.score(df, feature, target_var)["ppscore"]
+             # PPScore does not involve statistical hypothesis testing
+            importance_scores.append((feature, score, None))
 
-        importance_scores.append((feature, score))
+    # Create DataFrame from scores and include p-values if method is cramers_v
+    columns = ["Feature", "Univariate_Importance", "P_Value"] if method == "cramers_v" else ["Feature", "Univariate_Importance"]
+    importance_df = pd.DataFrame(importance_scores, columns=columns)
 
-    importance_df = pd.DataFrame(
-        importance_scores, columns=["Feature", "Univariate_Importance"]
-    )
-    # Sorting the DataFrame by importance
-    importance_df = importance_df.sort_values(
-        by="Univariate_Importance", ascending=False
-    )
+    # Sort the DataFrame by importance score in descending order
+    importance_df = importance_df.sort_values(by="Univariate_Importance", ascending=False)
 
     return importance_df
+
 
 
 def calculate_js_distances(
