@@ -108,7 +108,9 @@ num_features = [
 ]
 # Categorical features
 cat_features = [
-    "marital-status"
+    "workclass",
+    "education",
+    "occupation"
 ]
 # Value to replace outliers
 outlier_value = -999.001
