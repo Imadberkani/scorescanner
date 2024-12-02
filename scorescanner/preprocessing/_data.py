@@ -454,22 +454,24 @@ class multioptbinning:
                             )
                             # Retrieving detailed binning results
                             binning_table = model.binning_table.build().iloc[:-1]
-                            # Storing bin details in dictionary format for each categorical variable
-                            cat_features_details[variable] = [
-                                    {   
-                                        'bin_index': index,
-                                        'bin_label': str(row['Bin']),  
-                                        'count': int(row['Count']),
-                                        'count_percent': float(row['Count (%)']),
-                                        'non_event': int(row['Non-event']),
-                                        'event': int(row['Event']),
-                                        'event_rate': float(row['Event rate']),
-                                        'WoE': str(row['WoE']),
-                                        'IV': float(row['IV']),
-                                        'JS': float(row['JS'])
-                                    }
-                                    for index, row in binning_table.iterrows()
-                                ]
+
+                            if self.target_dtype == "binary":
+                                # Storing bin details in dictionary format for each categorical variable
+                                cat_features_details[variable] = [
+                                        {   
+                                            'bin_index': index,
+                                            'bin_label': str(row['Bin']),  
+                                            'count': int(row['Count']),
+                                            'count_percent': float(row['Count (%)']),
+                                            'non_event': int(row['Non-event']),
+                                            'event': int(row['Event']),
+                                            'event_rate': float(row['Event rate']),
+                                            'WoE': str(row['WoE']),
+                                            'IV': float(row['IV']),
+                                            'JS': float(row['JS'])
+                                        }
+                                        for index, row in binning_table.iterrows()
+                                    ]
 
                 elif model_type == 'HDBSCAN':
                     # Applying HDBSCAN labels
