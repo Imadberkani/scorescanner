@@ -6,10 +6,8 @@ Classes:
 
 - outlierdetector: A class designed to process a DataFrame by detecting and replacing `outliers`
                     in the numerical features specified by the `features` parameter.
-- multioptbinning: A class for transforming continuous features into categorical ones using optimal
-                   binning strategies across various feature types and target configurations. For numerical features
-                   where no significant relationship with the target is detected, an unsupervised clustering
-                   algorithm, `HDBSCAN`, is used.
+- multioptbinning: A class for transforming both continuous and categorical features using optimal binning strategies across 
+                   various feature (numerical or categorical) and target types ("binary","continuous","multiclass").
 - logisticregressionpreparer: A class for preparing data for logistic regression modeling.
 
 """
@@ -25,6 +23,7 @@ from hdbscan import HDBSCAN
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from tqdm import tqdm
 from typing import List, Union, Dict, Optional
+import json
 
 
 class outlierdetector:
@@ -224,9 +223,22 @@ class outlierdetector:
 
 class multioptbinning:
     """
-    A class for transforming continuous features into categorical ones using optimal binning strategies
-    across various feature types and target configurations. For Features where no significant relationship
-    with the target is detected, an unsupervised clustering algorithm, HDBSCAN, is used.
+    A class for transforming both continuous and categorical features using optimal binning strategies across 
+    various feature (numerical or categorical) and target types ("binary","continuous","multiclass"). This class
+    applies different strategies depending on the feature type:
+
+    - For numerical features, it transforms them into categorical ones by employing an optimal binning technique.
+      If no significant relationship with the target is detected during the binning process, an unsupervised
+      clustering algorithm HDBSCAN is used to group the values. For more details on HDBSCAN, see the HDBSCAN
+      user guide at https://hdbscan.readthedocs.io/en/latest/.
+
+    - For categorical features, this class groups categories using an optimal binning strategy. If no significant relationship
+      with the target is detected during the process, the original categories are maintained.
+      Note: The 'multiclass' target type does not support binning for categorical features.
+
+
+      Detailed documentation on the different optimal binning strategies can be found at the OptimalBinning 
+      documentation site: https://gnpalencia.org/optbinning/.
     """
 
     def __init__(
@@ -244,16 +256,21 @@ class multioptbinning:
         special_value: float = -999.001,
         additional_optb_params: dict = None,
         hdbscan_params: dict = None,
+        cat_features_info_json_file: str = None
     ):
         """
         Initializes the multioptbinning class.
 
         Parameters:
+
         num_features (list of str): A list of numerical features names to process for optimal binning.
+
         cat_features (list of str): A list of categorical features names to process for optimal binning.
+
         target ( str): Name of target column.
+
         target_dtype (str, optional (default="binary")) - The data type of the target variable. Supported types are "binary", "continuous", and "multiclass".
-        
+
         solver (str, optional (default="cp")) – The optimizer to solve the optimal binning problem. Supported solvers are “mip” to choose a
                                                 mixed-integer programming solver, “cp” to choose a constrained programming solver or “ls” to choose LocalSolver.
 
@@ -286,6 +303,8 @@ class multioptbinning:
 
         hdbscan_params (dict, optional): parameters for hdbscan clustering algorithm. For a full list of parameters, see the HDBSCAN documentation at [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html]).
 
+        cat_features_info_json_file (str, optional): Path to a JSON file where detailed information about the grouped categories for categorical features will be saved after binning.
+
         """
         # Initialization of class attributes
         self.num_features = num_features
@@ -302,7 +321,8 @@ class multioptbinning:
         self.hdbscan_params = hdbscan_params or {"min_samples": 2}
         self.special_value = special_value
         self.optb_models = {}
-        self.features= self.num_features + self.cat_features
+        self.features = self.num_features + self.cat_features
+        self.cat_features_info_json_file = cat_features_info_json_file
 
     def fit(self, df: pd.DataFrame, y=None) -> None:
         """
@@ -320,8 +340,9 @@ class multioptbinning:
         default_min_cluster_size = max(int(0.05 * len(df)), 2)  
         self.hdbscan_params.setdefault('min_cluster_size', default_min_cluster_size)
         
-    
+        # Iterating through all the features specified to fit models
         for variable in tqdm(self.features, desc="Fitting OptimalBinning Models"):
+            # Check if the variable is numerical or categorical
             if variable in self.num_features:
                 dtype = "numerical"
             elif variable in self.cat_features:
@@ -385,13 +406,11 @@ class multioptbinning:
                 if len(optb.splits) > 1:
                     self.optb_models[variable] = ('optimalbinning', optb)
                 else:
-                    # For categorical variables with fewer than two meaningful splits, record that no fitting was applied
+                    # For categorical variables with fewer than two bins, no fitting will be applied
                     self.optb_models[variable] = ('no_binning_applied', None)
                     print(f"No binning process was applied to the categorical variable '{variable}' due to the lack of significant strength with the target.")
             else:
                 raise ValueError(f"Unsupported dtype: {dtype} for variable: {variable}")
-
-    
 
     def transform(self, df):
         """
@@ -405,10 +424,13 @@ class multioptbinning:
         """
         # Creating a copy of the initial dataframe
         transformed_df = df.copy()
+        # Initialize an empty dictionary to store detailed information about the binning results for categorical features
+        cat_features_details = {}
         # Identify binary features
         binary_features = [
             col for col in df.columns if len(df[col].dropna().unique()) == 2
         ]
+        # Maping binary features to a special value if it matches the specified special_value
         transformed_df[binary_features] = transformed_df[binary_features].applymap(
             lambda x: "Special" if x == self.special_value else x
         )
@@ -420,10 +442,35 @@ class multioptbinning:
 
                 # Check the type of the model and perform corresponding actions
                 if model_type == 'optimalbinning':
-                        # Using the standard transformation if more than one bin
-                        transformed_df[variable] = model.transform(
-                            transformed_df[variable].values, metric="bins"
-                        )
+                        if model.dtype == 'numerical':
+                            # Using the standard transformation if more than one bin
+                            transformed_df[variable] = model.transform(
+                                transformed_df[variable].values, metric="bins"
+                            )
+                        elif model.dtype == 'categorical':
+                            # Using the standard transformation if more than one bin
+                            transformed_df[variable] = model.transform(
+                                transformed_df[variable].values, metric="indices"
+                            )
+                            # Retrieving detailed binning results
+                            binning_table = model.binning_table.build().iloc[:-1]
+                            # Storing bin details in dictionary format for each categorical variable
+                            cat_features_details[variable] = [
+                                    {   
+                                        'bin_index': index,
+                                        'bin_label': str(row['Bin']),  
+                                        'count': int(row['Count']),
+                                        'count_percent': float(row['Count (%)']),
+                                        'non_event': int(row['Non-event']),
+                                        'event': int(row['Event']),
+                                        'event_rate': float(row['Event rate']),
+                                        'WoE': str(row['WoE']),
+                                        'IV': float(row['IV']),
+                                        'JS': float(row['JS'])
+                                    }
+                                    for index, row in binning_table.iterrows()
+                                ]
+
                 elif model_type == 'HDBSCAN':
                     # Applying HDBSCAN labels
                     # Creating mask for missing values in the dataset
@@ -447,6 +494,11 @@ class multioptbinning:
                     transformed_df[variable] = df[variable]    
             else:
                 raise ValueError(f"Model not fitted for variable: {variable}")
+            
+        # Saving the categorical features details to a JSON file if specified    
+        if self.cat_features_info_json_file:
+            with open(self.cat_features_info_json_file, 'w') as f:
+                json.dump(cat_features_details, f, indent=4)    
         # Returns the DataFrame with the transformed features.
         return transformed_df
 

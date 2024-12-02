@@ -1,0 +1,138 @@
+{
+    "marital-status": [
+        {
+            "bin_index": 0,
+            "bin_label": "[' Never-married' ' Separated']",
+            "count": 11708,
+            "count_percent": 0.3595712662387519,
+            "non_event": 11151,
+            "event": 557,
+            "event_rate": 0.04757430816535702,
+            "WoE": "1.848472963697373",
+            "IV": 0.7025220862568067,
+            "JS": 0.07712242785780107
+        },
+        {
+            "bin_index": 1,
+            "bin_label": "[' Married-spouse-absent' ' Widowed' ' Divorced']",
+            "count": 5854,
+            "count_percent": 0.17978563311937595,
+            "non_event": 5272,
+            "event": 582,
+            "event_rate": 0.09941920054663478,
+            "WoE": "1.0554483731102",
+            "IV": 0.14675311136591346,
+            "JS": 0.01753745415903113
+        },
+        {
+            "bin_index": 2,
+            "bin_label": "[' Married-civ-spouse']",
+            "count": 14999,
+            "count_percent": 0.4606431006418722,
+            "non_event": 8297,
+            "event": 6702,
+            "event_rate": 0.44682978865257683,
+            "WoE": "-0.9347582409736753",
+            "IV": 0.48523184145800446,
+            "JS": 0.05853791647503909
+        },
+        {
+            "bin_index": 3,
+            "bin_label": "Special",
+            "count": 0,
+            "count_percent": 0.0,
+            "non_event": 0,
+            "event": 0,
+            "event_rate": 0.0,
+            "WoE": "0.0",
+            "IV": 0.0,
+            "JS": 0.0
+        },
+        {
+            "bin_index": 4,
+            "bin_label": "Missing",
+            "count": 0,
+            "count_percent": 0.0,
+            "non_event": 0,
+            "event": 0,
+            "event_rate": 0.0,
+            "WoE": "0.0",
+            "IV": 0.0,
+            "JS": 0.0
+        }
+    ],
+    "relationship": [
+        {
+            "bin_index": 0,
+            "bin_label": "[' Own-child' ' Other-relative']",
+            "count": 6049,
+            "count_percent": 0.18577439267835755,
+            "non_event": 5945,
+            "event": 104,
+            "event_rate": 0.017192924450322368,
+            "WoE": "2.8976686546428043",
+            "IV": 0.6584369967991424,
+            "JS": 0.06191733148958054
+        },
+        {
+            "bin_index": 1,
+            "bin_label": "[' Unmarried']",
+            "count": 3446,
+            "count_percent": 0.10583213046282362,
+            "non_event": 3228,
+            "event": 218,
+            "event_rate": 0.0632617527568195,
+            "WoE": "1.5468767112600454",
+            "IV": 0.15898790805373625,
+            "JS": 0.0181024500544274
+        },
+        {
+            "bin_index": 2,
+            "bin_label": "[' Not-in-family']",
+            "count": 8305,
+            "count_percent": 0.2550597340376524,
+            "non_event": 7449,
+            "event": 856,
+            "event_rate": 0.10307043949428056,
+            "WoE": "1.015318442693829",
+            "IV": 0.19510887434507906,
+            "JS": 0.023392228198220504
+        },
+        {
+            "bin_index": 3,
+            "bin_label": "[' Husband' ' Wife']",
+            "count": 14761,
+            "count_percent": 0.45333374282116645,
+            "non_event": 8098,
+            "event": 6663,
+            "event_rate": 0.45139218210148363,
+            "WoE": "-0.953198971311136",
+            "IV": 0.49773673379459255,
+            "JS": 0.05996374524233816
+        },
+        {
+            "bin_index": 4,
+            "bin_label": "Special",
+            "count": 0,
+            "count_percent": 0.0,
+            "non_event": 0,
+            "event": 0,
+            "event_rate": 0.0,
+            "WoE": "0.0",
+            "IV": 0.0,
+            "JS": 0.0
+        },
+        {
+            "bin_index": 5,
+            "bin_label": "Missing",
+            "count": 0,
+            "count_percent": 0.0,
+            "non_event": 0,
+            "event": 0,
+            "event_rate": 0.0,
+            "WoE": "0.0",
+            "IV": 0.0,
+            "JS": 0.0
+        }
+    ]
+}

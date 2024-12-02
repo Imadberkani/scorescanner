@@ -1,0 +1,70 @@
+{
+    "marital-status": [
+        {
+            "bin_label": "[' Never-married' ' Separated']",
+            "count": 11708,
+            "count_percent": 0.3595712662387519,
+            "non_event": 11151,
+            "event": 557,
+            "event_rate": 0.04757430816535702,
+            "WoE": "1.848472963697373",
+            "IV": 0.7025220862568067,
+            "JS": 0.07712242785780107
+        },
+        {
+            "bin_label": "[' Married-spouse-absent' ' Widowed' ' Divorced']",
+            "count": 5854,
+            "count_percent": 0.17978563311937595,
+            "non_event": 5272,
+            "event": 582,
+            "event_rate": 0.09941920054663478,
+            "WoE": "1.0554483731102",
+            "IV": 0.14675311136591346,
+            "JS": 0.01753745415903113
+        },
+        {
+            "bin_label": "[' Married-civ-spouse']",
+            "count": 14999,
+            "count_percent": 0.4606431006418722,
+            "non_event": 8297,
+            "event": 6702,
+            "event_rate": 0.44682978865257683,
+            "WoE": "-0.9347582409736753",
+            "IV": 0.48523184145800446,
+            "JS": 0.05853791647503909
+        },
+        {
+            "bin_label": "Special",
+            "count": 0,
+            "count_percent": 0.0,
+            "non_event": 0,
+            "event": 0,
+            "event_rate": 0.0,
+            "WoE": "0.0",
+            "IV": 0.0,
+            "JS": 0.0
+        },
+        {
+            "bin_label": "Missing",
+            "count": 0,
+            "count_percent": 0.0,
+            "non_event": 0,
+            "event": 0,
+            "event_rate": 0.0,
+            "WoE": "0.0",
+            "IV": 0.0,
+            "JS": 0.0
+        },
+        {
+            "bin_label": "",
+            "count": 32561,
+            "count_percent": 1.0,
+            "non_event": 24720,
+            "event": 7841,
+            "event_rate": 0.2408095574460244,
+            "WoE": "",
+            "IV": 1.3345070390807248,
+            "JS": 0.1531977984918713
+        }
+    ]
+}

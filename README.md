@@ -63,7 +63,6 @@ pip install scorescanner
 To start, let's import the "Adult" dataset from [UCI](https://archive.ics.uci.edu/dataset/2/adult), aimed at classifying individuals based on whether their income exceeds $50K/year.
 
 ```python
-
 # Importing libraries
 import os  
 import pandas as pd  
@@ -79,12 +78,15 @@ adult_data = pd.read_csv(
 # Setting a seed 
 np.random.seed(42)
 
-# Adding a random column from discrete uniform distribution 
-adult_data['random_column'] = np.random.randint(0, 100, size=len(adult_data))  
+# Adding a random numerical feature from discrete uniform distribution 
+adult_data['random_num_feature'] = np.random.randint(0, 100, size=len(adult_data)) 
+
+# Adding a random categorical feature from discrete uniform distribution 
+adult_data['random_category'] = np.random.choice(["cat1", "cat2", "cat3"], size=len(adult_data))
+
 
 # Displaying first rows
 adult_data.head()
-
 
 ```
 ![Adult DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/adult_data_re.png)
@@ -146,6 +148,7 @@ pipeline_steps = [
             target=target,
             target_dtype="binary",
             special_value=outlier_value,
+            cat_features_info_json_file="cat_features_info_json_file.json"
         ),
     ),
 ]
@@ -161,7 +164,6 @@ adult_data_binned = data_preprocessing_pipeline.transform(adult_data)
 
 #Overview of binned DataFrame
 adult_data_binned.head()
-
 
 ```
 ![Binned DataFrame](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/binned_data_re.png)
