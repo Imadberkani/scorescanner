@@ -44,7 +44,7 @@ def cramers_v(x: pd.Series, y: pd.Series) -> float:
     confusion_matrix = pd.crosstab(x, y)
 
     # Calculate the chi-squared statistic from the confusion matrix
-    chi2 = stats.chi2_contingency(confusion_matrix)[0]
+    chi2, p_value, _, _  = stats.chi2_contingency(confusion_matrix)
 
     # Calculate the total number of observations
     n = confusion_matrix.sum().sum()
@@ -65,7 +65,7 @@ def cramers_v(x: pd.Series, y: pd.Series) -> float:
     # Calculate the Cramér's V coefficient
     cramers_v_value = np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
 
-    return cramers_v_value
+    return cramers_v_value, p_value
 
 
 def univariate_feature_importance(

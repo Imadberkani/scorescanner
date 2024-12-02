@@ -100,8 +100,6 @@ Now, we propose two preprocessing steps:
 ##### Preprocessing parameters
 
 ```python
-
-
 # Target
 target = "income"
 # Numerical features
@@ -175,8 +173,6 @@ Now, we can identify the most `impactful features` on the `target` variable usin
 
 
 ```python
-
-
 from scorescanner.utils.statistical_metrics import (
     univariate_feature_importance,
     univariate_category_importance,
@@ -195,10 +191,6 @@ univariate_importance = univariate_feature_importance(
 
 # Display the univariate feature importance
 univariate_importance.style.bar(subset=["Univariate_Importance"], color="#5f8fd6")
-
-
-
-
 ```
 ![univariate importance](https://github.com/Imadberkani/scorescanner/blob/master/scorescanner/_images/univariate_importance.png)
 
