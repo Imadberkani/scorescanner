@@ -373,18 +373,23 @@ class multioptbinning:
             # Fiting the OptimalBinning model
             optb.fit(df[variable].values, encoded_target)
             # Check if OptimalBinning found at least one split (meaning at least two bins)
-            if len(optb.splits) >= 1:
-                self.optb_models[variable] = ('optimalbinning', optb)
-            else:
-                if dtype == "numerical":
+            if dtype == "numerical":
+                if len(optb.splits) >= 1:
+                    self.optb_models[variable] = ('optimalbinning', optb)
+                else:
                     # Apply HDBSCAN for numerical variables if fewer than two bins are found
                     hdbscan_model = HDBSCAN(**self.hdbscan_params).fit(df[variable].values.reshape(-1, 1))
                     self.optb_models[variable] = ('HDBSCAN', hdbscan_model)
-                    print(f"HDBSCAN was applied to the numerical variable '{variable}' due to the lack of significant splits.")
-                elif dtype == "categorical":
-                    # For categorical variables with fewer than two bins, record that no fitting was applied
+                    print(f"HDBSCAN was applied to the numerical variable '{variable}' due to the lack of significant strength with the target.")
+            elif dtype == "categorical":
+                if len(optb.splits) > 1:
+                    self.optb_models[variable] = ('optimalbinning', optb)
+                else:
+                    # For categorical variables with fewer than two meaningful splits, record that no fitting was applied
                     self.optb_models[variable] = ('no_binning_applied', None)
-                    print(f"No significant splits were found for the categorical variable '{variable}'; no binning was applied.")
+                    print(f"No binning process was applied to the categorical variable '{variable}' due to the lack of significant strength with the target.")
+            else:
+                raise ValueError(f"Unsupported dtype: {dtype} for variable: {variable}")
 
     
 
